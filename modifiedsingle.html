@@ -1,0 +1,20 @@
+<head>
+<link rel="stylesheet" type="text/css" href="modifiedsingle.css">
+</head>
+<div id="pregame">
+<select id="player" onchange="update_player()"><option value>New player</option></select>
+<input id="newplayer"><select id="newrank"></select>
+<button onclick="addplayer()">Enter</button><br>
+<button onclick="seed_players()">Start Tournement</button>
+<div id="players"><span class="AAA">Harold (AAA)</span><span class="B">Georgianne (B)</span><span class="AAA">SteveO (AAA)</span><span class="A">Rus (A)</span><span class="AAA">Fisher (AAA)</span><span class="A">Ram (A)</span><span class="SP">NickH (SP)</span><span class="A">Sergin (A)</span><span class="AA">JohonyW (AA)</span><span class="AA">AlexM (AA)</span></div>
+</div>
+<table hidden id="board" style="border-spacing:0">
+</table>
+<script type="text/javascript" src="fake.js"></script>
+<script type="text/javascript" src="modifiedsingle.js"></script>
+<script type="text/javascript">
+moreboard(8);
+moreboard(16);
+nextplayer=10;
+      maxplayer *= 2;
+</script>

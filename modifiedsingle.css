@@ -1,0 +1,18 @@
+.loseredge{
+  border-right-width: 2;
+  border-right:solid;;
+  border-right-color:black;
+}
+.winedge{
+  border-left-width: 2;
+  border-left:solid;;
+  border-left-color:black;
+}
+.matchedge{
+  border-bottom-width: 2;
+  border-bottom:solid;;
+  border-bottom-color:black;
+}
+.winedge16,.matchedge16,.winedge32,.matchedge32{
+  display:none
+}
