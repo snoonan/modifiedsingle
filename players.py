@@ -8,6 +8,7 @@ import clubs
 
 class Player(ndb.Model):
     """Models a player."""
+    name = ndb.StringProperty()
     firstName = ndb.StringProperty()
     lastName = ndb.StringProperty()
     club = ndb.KeyProperty(kind=clubs.Club)
