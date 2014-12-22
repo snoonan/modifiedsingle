@@ -1,6 +1,8 @@
 // loser of winner1 to play loser1 cross to -match
 // winner of loser3 play winner3 cross to match^1
 
+var tourneydate;
+
 var byeslots = [[16,8,12,4,14,6,10],   // 16 players
                 [32,16,24,8,28,12,20,4,30,14,22,6,26,10,18]  // 32 players
                ];
@@ -188,11 +190,19 @@ function winner(matchid)
    var winnerelem = matchelem[winneridx].firstChild;
    var loserelem  = matchelem[loseridx].firstChild;
 
+   console.log("Match "+matchid+": "+winnerelem.innerText+" beat "+loserelem.innerText);
+   var race = matchparent.innerText.split('/');
+   var player_w = winnerelem.innerText.split('(')[0].trim();
+   var rank_w = winnerelem.className;
+   var target_w = race[winneridx-1];
+   var player_l = loserelem.innerText.split('(')[0].trim();
+   var rank_l = loserelem.className;
+   var target_l = race[loseridx-1];
+   submit_match(matchid, player_w, rank_w, target_w, player_l, rank_l, target_l );
+
    matchparent.innerHTML = "";
    matchparent.appendChild(winnerelem.cloneNode(true));
    matchparent.firstChild.onclick = function() { match(matchid); };
-
-   console.log("Match "+matchid+": "+winnerelem.innerText+" beat "+loserelem.innerText);
 
    if (loserslot) {
       loserslot.innerHTML = "";
@@ -219,6 +229,9 @@ function seed_players()
    if (nextplayer < 8) {
       return; // not enough players.
    }
+
+   tourneydate = Math.floor(Date.now()/1000);
+
    document.getElementById("pregame").hidden = true;
    document.getElementById("board").hidden = false;
 
@@ -395,6 +408,7 @@ function initplayers(players)
 
 //document.onready = function() {
 if (1) {
+   document.title = clubname;
    initranks(ranks);
    initplayers(players);
 }
@@ -404,4 +418,28 @@ Array.prototype.shuffle = function() {
     while (this.length) s.push(this.splice(Math.random() * this.length, 1)[0]);
     while (s.length) this.push(s.pop());
     return this;
+}
+
+function submit_match(matchid, player_w, rank_w, target_w, player_l, rank_l, target_l )
+{
+   var r = new XMLHttpRequest(); 
+   r.open("POST", "Match/", true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return; 
+      console.log(r.responseText);
+   };
+   var f = new FormData();
+
+   f.append("club",club);
+   f.append("matchid",matchid);
+   f.append("date",tourneydate);
+   f.append("playerW",player_w);
+   f.append("handicapW",rank_w);
+   f.append("scoreW",0);
+   f.append("targetW",target_w);
+   f.append("playerL",player_l);
+   f.append("handicapL",rank_l);
+   f.append("scoreL",0);
+   f.append("targetL",target_l);
+   r.send(f);
 }

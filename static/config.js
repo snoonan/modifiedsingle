@@ -1,5 +1,8 @@
-ranks = ["PRO","SP","AAA","AA","A","B","C"];
-races ={"PRO":{"PRO":[5,5],"SP":[6,5],"AAA":[6,4],"AA":[6,3],"A":[7,3],"B":[7,2],"C":[8,2],"Bye":[0,0]},
+var club="test";
+var clubname="Lucky Shots Billards";
+
+var ranks = ["PRO","SP","AAA","AA","A","B","C"];
+var races ={"PRO":{"PRO":[5,5],"SP":[6,5],"AAA":[6,4],"AA":[6,3],"A":[7,3],"B":[7,2],"C":[8,2],"Bye":[0,0]},
         "SP" :{"PRO":[5,6],"SP":[5,5],"AAA":[5,4],"AA":[5,3],"A":[6,3],"B":[6,2],"C":[7,2],"Bye":[0,0]},
         "AAA":{"PRO":[4,6],"SP":[4,5],"AAA":[4,4],"AA":[4,3],"A":[5,3],"B":[5,2],"C":[6,2],"Bye":[0,0]},
         "AA" :{"PRO":[3,6],"SP":[3,5],"AAA":[3,4],"AA":[4,4],"A":[4,3],"B":[4,2],"C":[5,2],"Bye":[0,0]},
@@ -9,7 +12,7 @@ races ={"PRO":{"PRO":[5,5],"SP":[6,5],"AAA":[6,4],"AA":[6,3],"A":[7,3],"B":[7,2]
         "Bye"  :{"PRO":[0,08],"SP":[0,0],"AAA":[0,0],"AA":[0,0],"A":[0,0],"B":[0,0],"C":[0,0],"Bye":[0,0]}
         };
 
-players = [{'name':'Harold', 'rank':'AAA'},
+var players = [{'name':'Harold', 'rank':'AAA'},
            {'name':'Georgianne', 'rank':'B'},
            {'name':'SteveO', 'rank':'AAA'},
            {'name':'Rus', 'rank':'A'},
