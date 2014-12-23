@@ -50,6 +50,12 @@ var t_right = ["<td><td><td>",
                "<td><td><td>",
                "<td><td><td>"];
 
+// Config
+var club;
+var clubname;
+var players;
+// end config
+
 var nextplayer = 0;
 var maxplayer = 8;
 
@@ -408,9 +414,6 @@ function initplayers(players)
 
 //document.onready = function() {
 if (1) {
-   document.title = clubname;
-   initranks(ranks);
-   initplayers(players);
 }
 
 Array.prototype.shuffle = function() {
@@ -418,6 +421,22 @@ Array.prototype.shuffle = function() {
     while (this.length) s.push(this.splice(Math.random() * this.length, 1)[0]);
     while (s.length) this.push(s.pop());
     return this;
+}
+
+function load_config()
+{
+
+   var r = new XMLHttpRequest(); 
+   r.open("GET", "Config/", true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return; 
+      console.log(r.responseText);
+      eval(r.responseText);
+      document.title = clubname;
+      initranks(ranks);
+      initplayers(players);
+   };
+   r.send();
 }
 
 function submit_match(matchid, player_w, rank_w, target_w, player_l, rank_l, target_l )
