@@ -95,7 +95,6 @@ function addplayer()
    nextplayer += 1
    if (nextplayer > maxplayer) {
       maxplayer *= 2;
-      moreboard(maxplayer);
    }
 
    slot = document.getElementById("players");
@@ -239,21 +238,8 @@ function seed_players()
    tourneydate = Math.floor(Date.now()/1000);
 
    document.getElementById("pregame").hidden = true;
+   generateboard(maxplayer);
    document.getElementById("board").hidden = false;
-
-   // second round losers
-   for(row = 0; row < max/4; row++) {
-      var span = document.getElementById("l_"+String.fromCharCode(65+row));
-      span.id = "l_"+(24+(max/4-row));
-   }
-   // loser side winners
-   for(row = 0; row < max/8; row++) {
-      var span = document.getElementById("w_"+String.fromCharCode(65+row));
-      if (max == 8) {
-         row = 1; // Cheat to get correct cross
-      }
-      span.id = "w_"+(45+(Math.floor(row/2))*2+(1-row%2));
-   }
    var plist = document.getElementById("players").children;
    plist = [].slice.call(plist); // HtmlCollection to array
    plist.shuffle();
@@ -287,88 +273,67 @@ function seed_players()
    }
 }
 
-function moreboard(max)
+function generateboard(max)
 {
    var row;
-   if (max == 8) {
-      row = 0;
-   } else if (max == 16) {
-      row = 16;
-   } else {
-      row = 32;
-   }
-
    // center column is name/blank/name/blank/...
    var table_node = document.getElementById("board");
-   for (; row < max*2; row++) {
+   var loser1  = max/2
+   var winner1 = loser1+max/4;
+   var loser2  = winner1+max/4; // Fold loser of winner1
+   var winner2 = loser2+max/4;
+   var loser3  = winner2+max/8;
+   var winner3 = loser3+max/8;  // Fold winner of loser bracket
+   var winner4 = winner3+max/8;
+   var winner5 = winner4+max/16;
+   for (row = 0; row < max*2; row++) {
       var r;
       r = t_left[row%16].format({
-         "slot": Math.floor(row/16)+45,
+         "slot": Math.floor(row/16)+loser3+1,
       });
       r +=t_center4[row%8].format({
          "slot": (row/2)+1,
          "half": "ab".charAt(Math.floor((row%16)/8)),
-         "wmatch": Math.floor(row/8)+25,
-         "wwmatch": Math.floor(row/16)+41,
-         "lmatch": Math.floor(row/8)+17,
-         "lwmatch":Math.floor(row/8)+33,
-         "lwwmatch": Math.floor(row/16)+45,
+         "wmatch": Math.floor(row/8)+winner1+1,
+         "wwmatch": Math.floor(row/16)+winner2+1,
+         "lmatch": Math.floor(row/8)+loser1+1,
+         "lwmatch":Math.floor(row/8)+loser2+1,
+         "lwwmatch": Math.floor(row/16)+loser3+1,
          "match":  Math.floor(row/4)+1,
-         "loserof":String.fromCharCode(65+Math.floor(row/8))
+         "loserof":loser2 - Math.floor(row/8)      // loser2 is end of winner1
          });
+      var winnerof = (Math.floor(row/32)*2+(1-(Math.floor((row%32)/16))+loser3+1)); // /32 toggle low bit, + loser3 (+1 bias)
+      if (max == 8) {
+         winnerof = loser3+1;    // 8 player only has one loser fold in
+      }
       r += t_right[row%16].format({
-         "slot":    Math.floor(row/16)+41,
-         "winner":  Math.floor(row/16)+49,
+         "slot":    Math.floor(row/16)+winner2+1,
+         "winner":  Math.floor(row/16)+winner3+1,
          "half": "ab".charAt(Math.floor((row%32)/16)),
-         "wwinner": Math.floor(row/32)+53,
-         "winnerof":String.fromCharCode(65+Math.floor(row/16))
+         "wwinner": Math.floor(row/32)+winner4+1,
+         "winnerof":winnerof
       });
-      if (row%32 == 16) {
-         r += "<td class=\"winedge16 matchedge16\"><span id=\"m_{slot}\" class=\"{half}_{next}\">{slot}</span>".format({"slot":Math.floor(row/32)+53,"next":Math.floor(row/64)+55,"half":"ab".charAt(Math.floor((row%64)/32))});
-      }else if (row%32 > 8 && row%32 <= 24) {
-         r += "<td class=\"winedge16\">";
-      } else {
-         r += "<td>";
+      var i;
+      var base = winner4;
+      for (i = 16; i <= max; i = i*2) {
+         if (row % (i*2) == i) {
+            r += "<td class=\"winedge matchedge\"><span id=\"m_{slot}\" class=\"{half}_{next}\">{slot}</span>".format({
+                 "slot":Math.floor(row/(i*2))+base+1,
+                 "next":Math.floor(row/(i*4))+base+(max/i)+1,
+                 "half":"ab".charAt(Math.floor((row%(i*4))/i))
+               });
+
+         } else if ((row % (i*2) > i/2) && (row % (i*2) <= 3*i/2)) {
+            r += "<td class=\"winedge\">";
+         } else {
+            r += "<td>";
+         }
+         base += max/i;
       }
-      if (row%64 == 32) {
-         r += "<td class=\"winedge32 matchedge32\"><span id=\"m_{slot}\">{slot}</span>".format({"slot":Math.floor(row/64)+55});
-      } else if (row%64 > 16 && row%64 <= 48) {
-         r += "<td class=\"winedge32\">";
-      } else {
-         r += "<td>";
-      }
+
       var child = document.createElement("tr");
       child.innerHTML = r;
       table_node.appendChild(child);
-   }
-   // second round losers
-   for(row = 0; row < max/4; row++) {
-      var span = document.getElementById("l_"+String.fromCharCode(65+row));
-      span.innerText = "loser of "+(24+(max/4-row));
-   }
-   // loser side winners
-   for(row = 0; row < max/8; row++) {
-      var span = document.getElementById("w_"+String.fromCharCode(65+row));
-      if (max == 8) {
-         row = 1; // Cheat to get correct cross
-      }
-      span.innerText = "winner of "+(45+(Math.floor(row/2))*2+(1-row%2));
-   }
-   if (max >= 16) {
-      var e;
-      var x = document.getElementsByClassName("winedge16");
-      // Work down as the list is live, and we are changing membership
-      for (e=x.length-1; e >=0; e--) {
-         x[e].className = x[e].className.replace(/16/g,"");
-      }
-   }
-   if (max >= 32) {
-      var e;
-      var x = document.getElementsByClassName("winedge32");
-      // Work down as the list is live, and we are changing membership
-      for (e=x.length-1; e >=0; e--) {
-         x[e].className = x[e].className.replace(/32/g,"");
-      }
    }
 }
 
@@ -414,6 +379,7 @@ function initplayers(players)
 
 //document.onready = function() {
 if (1) {
+   load_config();
 }
 
 Array.prototype.shuffle = function() {

@@ -3,11 +3,12 @@ modifiedsingle
 
 Handicap'd modified single elimination tournament.
 
+Done:
+* backend match store
+* backend player store 
 
 current TODO (in approximate order)
 * UI changes (continuous)
-* backend match store
-* backend player store 
 * remove player from waiting list
 * display old tourney
 * Late players
