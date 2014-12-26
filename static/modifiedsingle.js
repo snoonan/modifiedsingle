@@ -2,10 +2,8 @@
 // winner of loser3 play winner3 cross to match^1
 
 var tourneydate;
+var canupdate = false;
 
-var byeslots = [[16,8,12,4,14,6,10],   // 16 players
-                [32,16,24,8,28,12,20,4,30,14,22,6,26,10,18]  // 32 players
-               ];
 var t_left = ["<td>",
               "<td>",
               "<td>",
@@ -24,13 +22,13 @@ var t_left = ["<td>",
               "<td>"];
 
 var t_center4 = [
-"<td><td><td><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\">Player {slot}</span><td><td>",
+"<td><td><td><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\"></span><td><td>",
 "<td><td><td><td class=\"loseredge matchedge\"><span id=\"l_{match}\" class=\"a_{lmatch}\">&nbsp;&nbsp;</span><td><td class=\"winedge matchedge\"><span id=\"m_{match}\" class=\"a_{wmatch}\"></span><td>",
-"<td><td><td class=\"loseredge\"><td class=\"loseredge\"><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"b_{match}\">Player {slot}</span><td class=\"winedge\"><td class=\"winedge\">",
+"<td><td><td class=\"loseredge\"><td class=\"loseredge\"><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"b_{match}\"></span><td class=\"winedge\"><td class=\"winedge\">",
 "<td><td class=\"matchedge\"><span id=\"m_{lmatch}\" class=\"a_{lwmatch}\">{lmatch}</span><td class=\"loseredge matchedge\">&nbsp;&nbsp;<td><td><td><td class=\"winedge matchedge\"><span id=\"m_{wmatch}\" class=\"{half}_{wwmatch}\">{wmatch}</span>",
-"<td class=\"loseredge matchedge\"><span id=\"m_{lwmatch}\" class=\"{half}_{lwwmatch}\">{lwmatch}</span><td><td class=\"loseredge\"><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\">Player {slot}</span><td><td class=\"winedge\">",
+"<td class=\"loseredge matchedge\"><span id=\"m_{lwmatch}\" class=\"{half}_{lwwmatch}\">{lwmatch}</span><td><td class=\"loseredge\"><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\"></span><td><td class=\"winedge\">",
 "<td class=\"loseredge\"><td class=\"matchedge\"><span id=\"l_{loserof}\" class=\"b_{lwmatch}\">loser of {loserof}</span><td class=\"loseredge\"><td class=\"loseredge matchedge\"><span id=\"l_{match}\" class=\"b_{lmatch}\">&nbsp;&nbsp;</span><td><td class=\"winedge matchedge\"><span id=\"m_{match}\" class=\"b_{wmatch}\"></span><td class=\"winedge\">",
-"<td><td><td><td class=\"loseredge\"><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"b_{match}\">Player {slot}</span><td class=\"winedge\"><td>",
+"<td><td><td><td class=\"loseredge\"><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"b_{match}\"></span><td class=\"winedge\"><td>",
 "<td><td><td><td><td><td><td>"];
 
 var t_right = ["<td><td><td>",
@@ -59,51 +57,37 @@ var players;
 var nextplayer = 0;
 var maxplayer = 8;
 
-function update_player()
+function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
 {
-   var player = document.getElementById("player");
-   var pname = document.getElementById("newplayer");
-   var prank = document.getElementById("newrank");
+   if (matchid <= maxplayers/2) {
+      var slot,element;
 
-   pname.value = player.value;
-   var rank = player.options[player.selectedIndex].innerText;
-   rank = rank.split("(")[1];
-   rank = rank.split(")")[0];
+      slot = document.getElementById("s_"+(((matchid-1)*2)+1));
+      element = document.createElement("span");
+      element.innerText = player_a+" ("+rank_a+")";
+      element.className += rank_a;
+      slot.appendChild(element);
+      slot = document.getElementById("s_"+(((matchid-1)*2)+2));
+      element = document.createElement("span");
+      element.innerText = player_b+" ("+rank_b+")";
+      element.className += rank_b;
+      slot.appendChild(element);
+      match(matchid);
 
-   var rankidx;
-   for (rankidx = 0; rankidx < prank.options.length; rankidx++) {
-      if (prank.options[rankidx].value == rank) {
-         break;
+   }
+   if (winneridx > 0) {
+      var matchelem = document.getElementById("winner_"+matchid);
+      if (matchelem == undefined) {
+         // Match must have already been decided.
+         return;
       }
-   }
-   prank.selectedIndex = rankidx;
 
+      matchelem.selectedIndex = winneridx;
+      winner(matchid);
+   }
 }
 
-function addplayer()
-{
-   var slot;
-   var element;
-   var name;
-   var rank;
-
-   element = document.getElementById("newplayer");
-   name = element.value;
-   element = document.getElementById("newrank");
-   rank = element.value;
-
-   nextplayer += 1
-   if (nextplayer > maxplayer) {
-      maxplayer *= 2;
-   }
-
-   slot = document.getElementById("players");
-   element = document.createElement("span");
-   element.innerText = name+" ("+rank+")";
-   element.className += rank;
-   slot.appendChild(element);
-}
-
+/* Return true if match finished */
 function match(matchid)
 {
    var element;
@@ -153,7 +137,7 @@ function match(matchid)
    }
    var sel = document.createElement("select");
    sel.id = "winner_"+matchid;
-   sel.onchange = function() { winner(matchid); };
+   sel.onchange = function() { winner(matchid); send_matches(); };
    var opt;
    opt = document.createElement("option");
    opt.innerText = "Select winner";
@@ -175,6 +159,10 @@ function match(matchid)
    opt = document.createElement("option");
    element.appendChild(sel);
 
+   var playername_a = player_a.innerText.split('(')[0].trim();
+   var playername_b = player_b.innerText.split('(')[0].trim();
+
+   submit_match(matchid, playername_a, player_a.className, race[0], playername_b, player_b.className, race[1], 0 )
    winner(matchid); // Test for automatic winner (bye)
 }
 
@@ -194,16 +182,18 @@ function winner(matchid)
    var loseridx = 1 + (2-winneridx); // 1 + (2-1) == 2  1 + (2-2) == 1
    var winnerelem = matchelem[winneridx].firstChild;
    var loserelem  = matchelem[loseridx].firstChild;
+   var elem_a  = matchelem[1].firstChild;
+   var elem_b  = matchelem[2].firstChild;
 
    console.log("Match "+matchid+": "+winnerelem.innerText+" beat "+loserelem.innerText);
    var race = matchparent.innerText.split('/');
-   var player_w = winnerelem.innerText.split('(')[0].trim();
-   var rank_w = winnerelem.className;
-   var target_w = race[winneridx-1];
-   var player_l = loserelem.innerText.split('(')[0].trim();
-   var rank_l = loserelem.className;
-   var target_l = race[loseridx-1];
-   submit_match(matchid, player_w, rank_w, target_w, player_l, rank_l, target_l );
+   var player_a = elem_a.innerText.split('(')[0].trim();
+   var rank_a = elem_a.className;
+   var target_a = race[0];
+   var player_b = elem_b.innerText.split('(')[0].trim();
+   var rank_b = elem_b.className;
+   var target_b = race[1];
+   submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, target_b, winneridx );
 
    matchparent.innerHTML = "";
    matchparent.appendChild(winnerelem.cloneNode(true));
@@ -224,53 +214,6 @@ function winner(matchid)
 
    console.log("Testing winner match "+winnerslot.className.slice(2));
    match(winnerslot.className.slice(2));
-}
-
-function seed_players()
-{
-   var max = maxplayer;
-   var row;
-
-   if (nextplayer < 8) {
-      return; // not enough players.
-   }
-
-   tourneydate = Math.floor(Date.now()/1000);
-
-   document.getElementById("pregame").hidden = true;
-   generateboard(maxplayer);
-   document.getElementById("board").hidden = false;
-   var plist = document.getElementById("players").children;
-   plist = [].slice.call(plist); // HtmlCollection to array
-   plist.shuffle();
-   var byes;
-   if (max <= 8) {
-      byes = []; // Minimum 8 players
-   } else if (max <= 16) {
-      byes = byeslots[0].slice(0,16-nextplayer);
-   } else {
-      byes = byeslots[1].slice(0,32-nextplayer);
-   }
-
-   var player = 0;
-   for(row = 0; row < max; row ++) {
-      var element;
-      if (byes.indexOf(row+1) != -1) {
-         element = document.createElement("span");
-         element.innerText = "Bye";
-         element.className = "Bye";
-      } else {
-         element = plist[player];
-         player += 1;
-      }
-      var slot = document.getElementById("s_"+(row+1));
-      slot.innerHTML = "";
-      slot.appendChild(element);
-   }
-   for(row = 0; row < max/2; row++) {
-      console.log("initial matches "+(row+1));
-      match(row+1);
-   }
 }
 
 function generateboard(max)
@@ -352,34 +295,10 @@ if (!String.prototype.format) {
     }
 }
 
-function initranks(ranks)
-{
-   var sel = document.getElementById("newrank");
-   var i;
-
-   for (i=0; i < ranks.length; i++) {
-      var e = document.createElement("option");
-      e.value = ranks[i];
-      e.innerText = ranks[i];
-      sel.appendChild(e);
-   }
-}
-function initplayers(players)
-{
-   var sel = document.getElementById("player");
-   var i;
-
-   for (i=0; i < players.length; i++) {
-      var e = document.createElement("option");
-      e.value = players[i].name;
-      e.innerText = players[i].name+" ("+players[i].rank+")";
-      sel.appendChild(e);
-   }
-}
 
 //document.onready = function() {
 if (1) {
-   load_config();
+
 }
 
 Array.prototype.shuffle = function() {
@@ -389,26 +308,40 @@ Array.prototype.shuffle = function() {
     return this;
 }
 
-function load_config()
+var to_submit = {};
+function submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, target_b, winner )
 {
-
-   var r = new XMLHttpRequest(); 
-   r.open("GET", "Config/", true);
-   r.onreadystatechange = function () {
-      if (r.readyState != 4 || r.status != 200) return; 
-      console.log(r.responseText);
-      eval(r.responseText);
-      document.title = clubname;
-      initranks(ranks);
-      initplayers(players);
-   };
-   r.send();
+   if (canupdate == false) {
+      return;
+   }
+   if (!to_submit.hasOwnProperty(matchid)) {
+      to_submit[matchid] = {}
+   }
+   to_submit[matchid]["player_a"] = player_a;
+   to_submit[matchid]["rank_a"] = rank_a;
+   to_submit[matchid]["target_a"] = target_a;
+   to_submit[matchid]["player_b"] = player_b;
+   to_submit[matchid]["rank_b"] = rank_b;
+   to_submit[matchid]["target_b"] = target_b;
+   to_submit[matchid]["winner"] = winner;
+   console.log("m:"+matchid+" w:"+winner);
 }
 
-function submit_match(matchid, player_w, rank_w, target_w, player_l, rank_l, target_l )
+function send_matches()
+{
+   for (var i in to_submit) {
+      if (!to_submit.hasOwnProperty(i)) {
+         continue;
+      }
+      _submit_match(i, to_submit[i]["player_a"],to_submit[i]["rank_a"],to_submit[i]["target_a"], to_submit[i]["player_b"],to_submit[i]["rank_b"],to_submit[i]["target_b"], to_submit[i]["winner"]);
+   }
+   to_submit = {};
+}
+
+function _submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, target_b, winner )
 {
    var r = new XMLHttpRequest(); 
-   r.open("POST", "Match/", true);
+   r.open("POST", "/Match/", true);
    r.onreadystatechange = function () {
       if (r.readyState != 4 || r.status != 200) return; 
       console.log(r.responseText);
@@ -417,14 +350,17 @@ function submit_match(matchid, player_w, rank_w, target_w, player_l, rank_l, tar
 
    f.append("club",club);
    f.append("matchid",matchid);
-   f.append("date",tourneydate);
-   f.append("playerW",player_w);
-   f.append("handicapW",rank_w);
-   f.append("scoreW",0);
-   f.append("targetW",target_w);
-   f.append("playerL",player_l);
-   f.append("handicapL",rank_l);
-   f.append("scoreL",0);
-   f.append("targetL",target_l);
+   f.append("tourney",tourneyname);
+   f.append("playerA",player_a);
+   f.append("handicapA",rank_a);
+   f.append("scoreA",0);
+   f.append("targetA",target_a);
+   f.append("playerB",player_b);
+   f.append("handicapB",rank_b);
+   f.append("scoreB",0);
+   f.append("targetB",target_b);
+   f.append("winner",winner);
+   console.log("!!m:"+matchid+" w:"+winner);
    r.send(f);
 }
+

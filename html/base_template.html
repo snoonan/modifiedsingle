@@ -1,0 +1,21 @@
+{%- autoescape true %}
+<head>
+  {%- block head %}
+  <title>{%- block title %}{%- endblock %}</title>
+  {%- endblock %}
+</head>
+<body>
+<div class="container">
+  <div id="header">
+    {%- block header %}{%- endblock %}
+  </div>
+  <div id="content">
+    {%- block content %}{%- endblock %}
+  </div>
+  <div id="footer">
+    <div>Web Issues: <a href="mailto:snoonan@tbearsiberians.com">Shelby Noonan</a></div>
+  </div>
+</div>
+</body>
+</html>
+{%- endautoescape %}

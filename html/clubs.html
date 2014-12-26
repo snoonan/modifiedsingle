@@ -1,0 +1,16 @@
+{% extends "/html/base_template.html" %}
+{% block title %}Tourney hosts{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  {{ login }}<p>
+
+   {%- for c in clubs %}
+       <a href="/Clubs/{{ c.key.id() }}">{{c.name}}</a><br>
+   {%- endfor %}
+{%- endblock %}

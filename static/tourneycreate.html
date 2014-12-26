@@ -1,7 +1,7 @@
 <head>
-<link rel="stylesheet" type="text/css" href="static/modifiedsingle.css">
 </head>
 <div id="pregame">
+Tourneyment name<input id="tname"><br>
 <select id="player" onchange="update_player()"><option value>New player</option></select>
 <input id="newplayer"><select id="newrank"></select>
 <button onclick="addplayer()">Enter</button><br>
@@ -10,8 +10,8 @@
 </div>
 <table hidden id="board" style="border-spacing:0">
 </table>
-<script type="text/javascript" src="static/config.js"></script>
-<script type="text/javascript" src="static/modifiedsingle.js"></script>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="tourneycreate.js"></script>
 <script type="text/javascript">
 nextplayer=10;
 maxplayer *= 2;

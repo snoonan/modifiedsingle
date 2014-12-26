@@ -1,0 +1,16 @@
+{% extends "/html/base_template.html" %}
+{% block title %}Tourney for {{club.name}}{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+  {{ login }}<p>
+
+   {%- for d in dates %}
+       <a href="/Tourney/{{d.club.id()}}/{{ d.slug}}">{{d.name}}</a><br>
+   {%- endfor %}
+{%- endblock %}

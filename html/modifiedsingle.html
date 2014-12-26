@@ -1,0 +1,18 @@
+<head>
+<link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
+</head>
+<table id="board" style="border-spacing:0">
+</table>
+<script type="text/javascript" src="/static/config.js"></script>
+<script type="text/javascript" src="/static/modifiedsingle.js"></script>
+<script type="text/javascript">
+   club = "{{club.key.id()}}";
+   tourneyname = "{{tourney.slug}}";
+   maxplayers = {{tourney.size}};
+   canupdate = {{create}};
+   generateboard({{tourney.size}});
+   {% for m in matches %}
+     match_results({{m.matchid}},"{{m.playerA.get().name}}", "{{m.handicapA}}", "{{m.playerB.get().name}}", "{{m.handicapB}}", {{m.winner}});
+   {% endfor %}
+   send_matches();
+</script>

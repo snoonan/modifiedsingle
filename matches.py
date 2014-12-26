@@ -6,21 +6,27 @@ from google.appengine.ext import ndb
 #
 
 import clubs
+import tourneys
 import players
 
 class Match(ndb.Model):
     """Models a match between two players."""
-    date = ndb.DateTimeProperty()
+
     matchid = ndb.IntegerProperty()
     club = ndb.KeyProperty(kind=clubs.Club)
+    tourney = ndb.KeyProperty(kind=tourneys.Tourney)
 
-    playerW = ndb.KeyProperty(kind=players.Player)
-    handicapW = ndb.StringProperty()
-    scoreW = ndb.IntegerProperty()
-    targetW = ndb.IntegerProperty()
+    playerA = ndb.KeyProperty(kind=players.Player)
+    handicapA = ndb.StringProperty()
+    scoreA = ndb.IntegerProperty()
+    targetA = ndb.IntegerProperty()
 
-    playerL = ndb.KeyProperty(kind=players.Player)
-    handicapL = ndb.StringProperty()
-    scoreL = ndb.IntegerProperty()
-    targetL = ndb.IntegerProperty()
+    playerB = ndb.KeyProperty(kind=players.Player)
+    handicapB = ndb.StringProperty()
+    scoreB = ndb.IntegerProperty()
+    targetB = ndb.IntegerProperty()
+
+    winner = ndb.IntegerProperty(default = 0)
+
+
 
