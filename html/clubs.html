@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-  {{ login }}<p>
+  {{ login|safe }}<p>
 
    {%- for c in clubs %}
        <a href="/Clubs/{{ c.key.id() }}">{{c.name}}</a><br>
