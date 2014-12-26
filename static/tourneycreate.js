@@ -3,11 +3,8 @@
 
 var tourneydate;
 
-var byeslots = [[16,8,12,4,14,6,10],   // 16 players
-                [32,16,24,8,28,12,20,4,30,14,22,6,26,10,18]  // 32 players
-               ];
 // Config
-var club = "lsb";
+var club;
 var clubname;
 var players;
 // end config
@@ -96,14 +93,17 @@ function fill_slots()
    var plist = document.getElementById("players").children;
    plist = [].slice.call(plist); // HtmlCollection to array
    plist.shuffle();
-   var byes;
-   if (max <= 8) {
-      byes = []; // Minimum 8 players
-   } else if (max <= 16) {
-      byes = byeslots[0].slice(0,16-nextplayer);
-   } else {
-      byes = byeslots[1].slice(0,32-nextplayer);
+   var byes = [1];
+
+   for(var i = 1; i < max/2; i*=2) {
+      var next = [];
+      for(var b = 0; b < byes.length; b++) {
+         next.push(byes[b]+i);
+         next.push(byes[b]);
+      }
+      byes = next;
    }
+   byes = byes.slice(0,max-nextplayer);
 
    var slot = 0;
    var player_a;
@@ -117,8 +117,7 @@ function fill_slots()
       var p = plist.pop();
       player_a = p.innerText.split('(')[0].trim();
       rank_a = p.className;
-      slot += 1;
-      if (byes.indexOf(slot+1) != -1) {
+      if (byes.indexOf(slot/2+1) != -1) {
          player_b = "Bye";
          rank_b = "Bye";
       } else {
@@ -126,10 +125,10 @@ function fill_slots()
          player_b = p.innerText.split('(')[0].trim();
          rank_b = p.className;
       }
-      slot += 1;
+      slot += 2;
       submit_match(slot/2, player_a, rank_a, races[rank_a][rank_b][0], player_b, rank_b, races[rank_a][rank_b][1], 0 );
    }
-   //window.location.pathname = "/Tourney/"+club+"/"+tourneydate
+   setTimeout(function () { window.location.pathname = "/Tourney/"+club+"/"+tourneyname; }, 5000);
 }
 
 //document.onready = function() {

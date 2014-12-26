@@ -142,7 +142,25 @@ class Config(webapp2.RequestHandler):
       self.response.out.write('            {"name":"Bye","rank":"Bye"}\n')
       self.response.out.write('            ];\n')
 
-class CreateTourneyHandler(webapp2.RequestHandler):
+class CreateTourneyHandler(base_handler.BaseHandler):
+   def get(self, clubid):
+      TEMPLATE = 'html/tourneycreate.html'
+
+      create = 0
+      user = users.get_current_user()
+      club = clubs.Club.get_by_id(clubid)
+      if user == None:
+         login = "<a href="+users.create_login_url()+">login</a>"
+      else:
+         login = "Logged in as "+user.nickname()
+         if user in club.owners or user.email() in club.invited:
+            create = 1
+
+      context = {'create': create,
+                 'club': club,
+                 'login': login}
+      self.render_response(TEMPLATE, **context)
+
    def post(self, clubid):
 
       user = users.get_current_user()
@@ -209,9 +227,10 @@ class ClubHandler(base_handler.BaseHandler):
       club = clubs.Club.get_by_id(clubid)
       if user == None:
          login = "<a href="+users.create_login_url()+">login</a>"
-         create = True
       else:
          login = "Logged in as "+user.nickname()
+         if user in club.owners or user.email() in club.invited:
+            create = True
 
       dates = tourneys.Tourney.query(tourneys.Tourney.club == ndb.Key(clubs.Club, clubid)).fetch()
 
