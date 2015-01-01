@@ -12,7 +12,7 @@ var t_left = ["<td>",
               "<td class=\"loseredge\">",
               "<td class=\"loseredge\">",
               "<td class=\"loseredge\">",
-              "<td class=\"loseredge matchedge\"><span id=\"m_{slot}\" win=\"{winner}\">{slot}</span>",
+              "<td class=\"loseredge matchedge\"><span id=\"m_{slot}\" win=\"{winner}\">#{slot}</span>",
               "<td class=\"loseredge\">",
               "<td class=\"loseredge\">",
               "<td class=\"loseredge\">",
@@ -25,9 +25,9 @@ var t_center4 = [
 "<td><td><td><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\"></span><td><td>",
 "<td><td><td><td class=\"loseredge matchedge\"><span id=\"l_{match}\" class=\"a_{lmatch}\">&nbsp;&nbsp;</span><td><td class=\"winedge matchedge\"><span id=\"m_{match}\" class=\"a_{wmatch}\"></span><td>",
 "<td><td><td class=\"loseredge\"><td class=\"loseredge\"><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"b_{match}\"></span><td class=\"winedge\"><td class=\"winedge\">",
-"<td><td class=\"matchedge\"><span id=\"m_{lmatch}\" class=\"a_{lwmatch}\">{lmatch}</span><td class=\"loseredge matchedge\">&nbsp;&nbsp;<td><td><td><td class=\"winedge matchedge\"><span id=\"m_{wmatch}\" class=\"{half}_{wwmatch}\">{wmatch}</span>",
-"<td class=\"loseredge matchedge\"><span id=\"m_{lwmatch}\" class=\"{half}_{lwwmatch}\">{lwmatch}</span><td><td class=\"loseredge\"><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\"></span><td><td class=\"winedge\">",
-"<td class=\"loseredge\"><td class=\"matchedge\"><span id=\"l_{loserof}\" class=\"b_{lwmatch}\">loser of {loserof}</span><td class=\"loseredge\"><td class=\"loseredge matchedge\"><span id=\"l_{match}\" class=\"b_{lmatch}\">&nbsp;&nbsp;</span><td><td class=\"winedge matchedge\"><span id=\"m_{match}\" class=\"b_{wmatch}\"></span><td class=\"winedge\">",
+"<td><td class=\"matchedge\"><span id=\"m_{lmatch}\" class=\"a_{lwmatch}\">#{lmatch}</span><td class=\"loseredge matchedge\">&nbsp;&nbsp;<td><td><td><td class=\"winedge matchedge\"><span id=\"m_{wmatch}\" class=\"{half}_{wwmatch}\">#{wmatch}</span>",
+"<td class=\"loseredge matchedge\"><span id=\"m_{lwmatch}\" class=\"{half}_{lwwmatch}\">#{lwmatch}</span><td><td class=\"loseredge\"><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\"></span><td><td class=\"winedge\">",
+"<td class=\"loseredge\"><td class=\"matchedge\"><span id=\"l_{loserof}\" class=\"b_{lwmatch}\">loser of #{loserof}</span><td class=\"loseredge\"><td class=\"loseredge matchedge\"><span id=\"l_{match}\" class=\"b_{lmatch}\">&nbsp;&nbsp;</span><td><td class=\"winedge matchedge\"><span id=\"m_{match}\" class=\"b_{wmatch}\"></span><td class=\"winedge\">",
 "<td><td><td><td class=\"loseredge\"><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"b_{match}\"></span><td class=\"winedge\"><td>",
 "<td><td><td><td><td><td><td>"];
 
@@ -38,9 +38,9 @@ var t_right = ["<td><td><td>",
                "<td class=\"winedge\"><td><td>",
                "<td class=\"winedge\"><td><td>",
                "<td class=\"winedge\"><td><td>",
-               "<td class=\"winedge matchedge\"><td class=\"matchedge\"><span id=\"m_{slot}\"  class=\"a_{winner}\" win=\"m_{winner}\">{slot}</span><td>",
-               "<td class=\"winedge\"><td><td class=\"winedge matchedge\"><span id=\"m_{winner}\" class=\"{half}_{wwinner}\">{winner}</span>",
-               "<td class=\"winedge\">&nbsp;&nbsp;<td class=\"matchedge\"><span id=\"w_{winnerof}\"  class=\"b_{winner}\" win=\"m_{winner}\">winner of {winnerof}</span><td class=\"winedge\">",
+               "<td class=\"winedge matchedge\"><td class=\"matchedge\"><span id=\"m_{slot}\"  class=\"a_{winner}\" win=\"m_{winner}\">#{slot}</span><td>",
+               "<td class=\"winedge\"><td><td class=\"winedge matchedge\"><span id=\"m_{winner}\" class=\"{half}_{wwinner}\">#{winner}</span>",
+               "<td class=\"winedge\">&nbsp;&nbsp;<td class=\"matchedge\"><span id=\"w_{winnerof}\"  class=\"b_{winner}\" win=\"m_{winner}\">winner of #{winnerof}</span><td class=\"winedge\">",
                "<td class=\"winedge\"><td><td>",
                "<td class=\"winedge\"><td><td>",
                "<td><td><td>",
@@ -64,12 +64,18 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
 
       slot = document.getElementById("s_"+(((matchid-1)*2)+1));
       element = document.createElement("span");
-      element.innerText = player_a+" ("+rank_a+")";
+      element.innerText = player_a;
+      if (player_a != "Bye") {
+         element.innerText += " ("+rank_a+")";
+      }
       element.className += rank_a;
       slot.appendChild(element);
       slot = document.getElementById("s_"+(((matchid-1)*2)+2));
       element = document.createElement("span");
-      element.innerText = player_b+" ("+rank_b+")";
+      element.innerText = player_b;
+      if (player_b != "Bye") {
+         element.innerText += " ("+rank_b+")";
+      }
       element.className += rank_b;
       slot.appendChild(element);
       match(matchid);
@@ -140,7 +146,7 @@ function match(matchid)
    sel.onchange = function() { winner(matchid); send_matches(); };
    var opt;
    opt = document.createElement("option");
-   opt.innerText = "Select winner";
+   opt.innerText = "Select winner of #"+matchid;
    sel.appendChild(opt);
    opt = document.createElement("option");
    opt.value = player_a.className;
@@ -260,7 +266,7 @@ function generateboard(max)
       var base = winner4;
       for (i = 16; i <= max; i = i*2) {
          if (row % (i*2) == i) {
-            r += "<td class=\"winedge matchedge\"><span id=\"m_{slot}\" class=\"{half}_{next}\">{slot}</span>".format({
+            r += "<td class=\"winedge matchedge\"><span id=\"m_{slot}\" class=\"{half}_{next}\">#{slot}</span>".format({
                  "slot":Math.floor(row/(i*2))+base+1,
                  "next":Math.floor(row/(i*4))+base+(max/i)+1,
                  "half":"ab".charAt(Math.floor((row%(i*4))/i))

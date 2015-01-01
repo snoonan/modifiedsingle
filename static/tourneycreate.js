@@ -63,6 +63,10 @@ function seed_players()
    if (nextplayer < 8) {
       return; // not enough players.
    }
+   var pre = document.getElementById("pregame");
+   pre.hidden = true;
+   var pre = document.getElementById("loading");
+   pre.hidden = false;
 
    tourneydate = Math.floor(Date.now()/1000);
    var tname = document.getElementById("tname");
