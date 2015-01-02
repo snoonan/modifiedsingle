@@ -60,7 +60,18 @@ function addplayer()
 function seed_players()
 {
 
-   if (nextplayer < 8) {
+   var plist = document.getElementById("players").children;
+   var nplayers = plist.length;
+   var max = plist.length;
+   // round down to power of two
+   while(max&(max-1)) {
+      max = max&(max-1);
+   }
+   // double in it was changed by rounding
+   if (max != plist.length) {
+      max *= 2;
+   }
+   if (nplayers < 8) {
       return; // not enough players.
    }
    var pre = document.getElementById("pregame");
@@ -82,7 +93,7 @@ function seed_players()
    f.append("club",club);
    f.append("name",tname.value);
    f.append("date",tourneydate);
-   f.append("size",maxplayer);
+   f.append("size",max);
    r.send(f);
 
    tourneyname = tname.value.replace(/[^a-zA-Z0-9]/g, "-")
@@ -91,10 +102,20 @@ function seed_players()
 
 function fill_slots()
 {
-   var max = maxplayer;
    var row;
 
    var plist = document.getElementById("players").children;
+   var nplayers = plist.length;
+   var max = plist.length;
+   // round down to power of two
+   while(max&(max-1)) {
+      max = max&(max-1);
+   }
+   // double in it was changed by rounding
+   if (max != plist.length) {
+      max *= 2;
+   }
+   maxplayers = max; // update global
    plist = [].slice.call(plist); // HtmlCollection to array
    plist.shuffle();
    var byes = [1];
@@ -107,7 +128,7 @@ function fill_slots()
       }
       byes = next;
    }
-   byes = byes.slice(0,max-nextplayer);
+   byes = byes.slice(0,max-nplayers);
 
    var slot = 0;
    var player_a;
@@ -117,7 +138,7 @@ function fill_slots()
 
 
 
-   while (slot < maxplayer) {
+   while (slot < max) {
       var p = plist.pop();
       player_a = p.innerText.split('(')[0].trim();
       rank_a = p.className;

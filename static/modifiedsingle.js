@@ -129,6 +129,31 @@ function match(matchid)
       race_str = race[0]+"/"+race[1];
    }
    console.log("Newmatch "+matchid+": "+player_a.innerText+" vs "+player_b.innerText + race_str);
+   var openlist = document.getElementById("openmatches");
+   var existing = document.getElementById("o_"+matchid);
+   if (openlist && !existing) {
+      var open = document.createElement("tr");
+      var td = document.createElement("td");
+
+      open.id = 'o_'+matchid
+      td.innerText = '#'+matchid+' '+player_a.innerText+" vs "+player_b.innerText + ' '+race_str;
+      open.appendChild(td);
+      td = document.createElement("td");
+      var loc = document.createElement("input");
+      loc.size = 3;
+      loc.onblur = assigntable;
+      loc.onkeypress = keypress;
+      td.appendChild(loc);
+      open.appendChild(td);
+
+      var child = openlist.children[0];
+
+      while(child && +child.id.slice(2) < matchid) {
+         child = child.nextSibling;
+      }
+      openlist.insertBefore(open, child);
+   }
+
    /*
    element.innerHTML="<input id=\"m_"+matchid+"_a\" size=\"1\" value=\""+race[0]+"\">/"+
                      "<input id=\"m_"+matchid+"_b\" size=\"1\" value=\""+race[1]+"\">"+
@@ -172,6 +197,10 @@ function match(matchid)
    winner(matchid); // Test for automatic winner (bye)
 }
 
+function keypress(e) {
+   console.log(e);
+}
+
 function winner(matchid)
 {
    var matchelem = document.getElementById("winner_"+matchid);
@@ -192,6 +221,8 @@ function winner(matchid)
    var elem_b  = matchelem[2].firstChild;
 
    console.log("Match "+matchid+": "+winnerelem.innerText+" beat "+loserelem.innerText);
+
+
    var race = matchparent.innerText.split('/');
    var player_a = elem_a.innerText.split('(')[0].trim();
    var rank_a = elem_a.className;
@@ -220,6 +251,19 @@ function winner(matchid)
 
    console.log("Testing winner match "+winnerslot.className.slice(2));
    match(winnerslot.className.slice(2));
+
+   // Now remove the match info, and donate the table
+   var open = document.getElementById('o_'+matchid);
+   if (open) {
+      var loc = open.children[1].innerText;
+      var list = open.parentElement;
+      list.removeChild(open);
+      var child = list.getElementsByTagName('input')[0];
+      if (child) {
+         child.focus();
+         child.value = loc;
+      }
+   }
 }
 
 function generateboard(max)
@@ -284,8 +328,39 @@ function generateboard(max)
       child.innerHTML = r;
       table_node.appendChild(child);
    }
+   var open;
+   if (window.location.hash.length == 2) {
+      open = document.createElement("td");
+      open.setAttribute("rowspan",max-2);
+      table_node.children[0].appendChild(open)
+   } else if (window.location.hash.length == 3) {
+      open = document.createElement("div");
+      document.body.appendChild(open)
+   }
+   if (open) {
+   var tab;
+   var sel,opt;
+   opt = document.createElement("option");
+   opt.innerText = 'new';
+   sel = document.createElement("select");
+   sel.appendChild(opt);
+   sel.onselected = assigntable;
+   sel.hidden = true;
+   sel.id = 'select';
+   open.appendChild(sel);
+   tab = document.createElement("table");
+   tab.id = "openmatches";
+   open.appendChild(tab);
+   }
+
 }
 
+function assigntable(e) {
+   var loc = e.target.value;
+   if (loc.length) {
+      e.target.parentElement.innerText = loc;
+   }
+}
 
 
 if (!String.prototype.format) {
