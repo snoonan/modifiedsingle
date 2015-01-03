@@ -51,7 +51,8 @@ class DataStore(webapp2.RequestHandler):
          player_a.handicap = r_handicapA
          player_a = player_a.put()
       else:
-         player_a = player_a[0].key
+         player_a[0].handicap = r_handicapA
+         player_a = player_a[0].put()
 
       player_b = players.Player.query(ndb.AND(players.Player.name == r_playerB, players.Player.club == club.key)).fetch(1)
       if player_b == []:
@@ -62,7 +63,8 @@ class DataStore(webapp2.RequestHandler):
          player_b.handicap = r_handicapB
          player_b = player_b.put()
       else:
-         player_b = player_b[0].key
+         player_b[0].handicap = r_handicapB
+         player_b = player_b[0].put()
 
       match = matches.Match.query(ndb.AND(matches.Match.tourney == tourney.key, matches.Match.matchid == int(r_matchid))).fetch(1)
       if match == []:
