@@ -10,8 +10,6 @@ var players;
 // end config
 
 var nextplayer = 0;
-var maxplayer = 8;
-
 function update_player()
 {
    var player = document.getElementById("player");
@@ -46,15 +44,22 @@ function addplayer()
    rank = element.value;
 
    nextplayer += 1
-   if (nextplayer > maxplayer) {
-      maxplayer *= 2;
-   }
 
    slot = document.getElementById("players");
    element = document.createElement("span");
    element.innerText = name+" ("+rank+")";
    element.className += rank;
+   element.onclick = removeplayer;
    slot.appendChild(element);
+}
+
+function removeplayer(e) {
+   var name = document.getElementById("newplayer");
+   var rank = document.getElementById("newrank");
+
+   name.value = e.target.innerText.split('(')[0].trim();
+   rank.value = e.target.innerText.split('(')[1].split(')')[0].trim();
+   e.target.parentElement.removeChild(e.target);
 }
 
 function seed_players()
@@ -235,4 +240,15 @@ function submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, tar
    f.append("targetB",target_b);
    f.append("winner",winner);
    r.send(f);
+}
+
+function adddummy() {
+   var name = document.getElementById("newplayer");
+   var rank = document.getElementById("newrank");
+
+   for(var i = 0; i < 10; i++) {
+      name.value = "Player_"+nextplayer;
+      rank.value = ranks[nextplayer%ranks.length];
+      addplayer();
+   }
 }
