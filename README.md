@@ -8,11 +8,11 @@ Done:
 * backend player store 
 * display old tourney
 * 64+ player grids (Edgies has a bigger board)
+* remove player from waiting list
+* edit rank during tourney
 
 current TODO (in approximate order)
 * UI changes (continuous)
-* remove player from waiting list
 * Late players
 * buyback?
-* edit rank during tourney
 * out-of-line player adjust

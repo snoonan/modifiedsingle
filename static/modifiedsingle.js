@@ -237,10 +237,10 @@ function winner(matchid)
 
    matchparent.innerHTML = "";
    matchparent.appendChild(winnerelem.cloneNode(true));
-   var cancel = document.createElement("span");
-   cancel.innerText = "x";
-   cancel.className = "cancel";
-   cancel.onclick = function() { match(matchid); };
+   var cancel = document.createElement("select");
+   cancel.innerHTML = "<option><option>bump skill<option>lower skill<option>change winner";
+   cancel.style.width="20px";
+   cancel.onchange = function() { editplayer(matchparent.children[0]); };
 
    matchparent.appendChild(cancel);
 
@@ -248,10 +248,10 @@ function winner(matchid)
    if (loserslot) {
       loserslot.innerHTML = "";
       loserslot.appendChild(loserelem.cloneNode(true));
-      var cancel = document.createElement("span");
-      cancel.innerText = "x";
-      cancel.className = "cancel";
-      cancel.onclick = function() { match(matchid); };
+      var cancel = document.createElement("select");
+      cancel.innerHTML = "<option><option>bump skill<option>lower skill<option>change winner";
+      cancel.style.width="20px";
+      cancel.onchange = function() { editplayer(loserslot.children[0]); };
 
       loserslot.appendChild(cancel);
       console.log("Testing loser match "+loserslot.className.slice(2));
@@ -260,10 +260,10 @@ function winner(matchid)
    if (winnerslot) {
       winnerslot.innerHTML = "";
       winnerslot.appendChild(winnerelem.cloneNode(true));
-      var cancel = document.createElement("span");
-      cancel.innerText = "x";
-      cancel.className = "cancel";
-      cancel.onclick = function() { match(matchid); };
+      var cancel = document.createElement("select");
+      cancel.innerHTML = "<option><option>bump skill<option>lower skill<option>change winner";
+      cancel.style.width="20px";
+      cancel.onchange = function() { editplayer(winnerslot.children[0]); };
 
       winnerslot.appendChild(cancel);
    } else {
@@ -288,6 +288,30 @@ function winner(matchid)
          child.focus();
          child.value = loc;
       }
+   }
+}
+
+function editplayer(pinfo)
+{
+   var sel = pinfo.parentElement.children[1].selectedIndex;
+
+   if (sel == 1) {
+      var rank = pinfo.className;
+      rank = ranks[ranks.indexOf(rank)-1];
+      pinfo.className = rank;
+      pinfo.innerText = pinfo.innerText.split('(')[0]+"("+rank+")";
+
+      match(pinfo.parentElement.className.slice(2));
+   } else if (sel == 2) {
+      var rank = pinfo.className;
+      rank = ranks[ranks.indexOf(rank)+1];
+      pinfo.className = rank;
+      pinfo.innerText = pinfo.innerText.split('(')[0]+"("+rank+")";
+
+      match(pinfo.parentElement.className.slice(2));
+   } else if (sel == 3) {
+      var matchid = pinfo.parentElement.id.slice(2);
+      match(matchid);
    }
 }
 
