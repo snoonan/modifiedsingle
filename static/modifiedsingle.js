@@ -133,17 +133,20 @@ function match(matchid)
    var existing = document.getElementById("o_"+matchid);
    if (openlist && !existing) {
       var open = document.createElement("tr");
-      var td = document.createElement("td");
-
       open.id = 'o_'+matchid
-      td.innerText = '#'+matchid+' '+player_a.innerText+" vs "+player_b.innerText + ' '+race_str;
-      open.appendChild(td);
-      td = document.createElement("td");
+
+      var td = document.createElement("td");
+      td.innerText = "Assign ";
+
       var loc = document.createElement("input");
       loc.size = 3;
       loc.onblur = assigntable;
       loc.onkeypress = keypress;
       td.appendChild(loc);
+      open.appendChild(td);
+
+      td = document.createElement("td");
+      td.innerText = '#'+matchid+' '+player_a.innerText+" vs "+player_b.innerText + ' '+race_str;
       open.appendChild(td);
 
       var child = openlist.children[0];
@@ -234,17 +237,35 @@ function winner(matchid)
 
    matchparent.innerHTML = "";
    matchparent.appendChild(winnerelem.cloneNode(true));
-   matchparent.firstChild.onclick = function() { match(matchid); };
+   var cancel = document.createElement("span");
+   cancel.innerText = "x";
+   cancel.className = "cancel";
+   cancel.onclick = function() { match(matchid); };
+
+   matchparent.appendChild(cancel);
+
 
    if (loserslot) {
       loserslot.innerHTML = "";
       loserslot.appendChild(loserelem.cloneNode(true));
+      var cancel = document.createElement("span");
+      cancel.innerText = "x";
+      cancel.className = "cancel";
+      cancel.onclick = function() { match(matchid); };
+
+      loserslot.appendChild(cancel);
       console.log("Testing loser match "+loserslot.className.slice(2));
       match(loserslot.className.slice(2));
    }
    if (winnerslot) {
       winnerslot.innerHTML = "";
       winnerslot.appendChild(winnerelem.cloneNode(true));
+      var cancel = document.createElement("span");
+      cancel.innerText = "x";
+      cancel.className = "cancel";
+      cancel.onclick = function() { match(matchid); };
+
+      winnerslot.appendChild(cancel);
    } else {
       winnerslot = matchparent;
    }
@@ -255,9 +276,13 @@ function winner(matchid)
    // Now remove the match info, and donate the table
    var open = document.getElementById('o_'+matchid);
    if (open) {
-      var loc = open.children[1].innerText;
+      var loc = open.children[0].innerText;
       var list = open.parentElement;
       list.removeChild(open);
+      if (loc == "Assign ") {
+         return;
+      }
+      loc = loc.split(":")[1].trim()
       var child = list.getElementsByTagName('input')[0];
       if (child) {
          child.focus();
@@ -358,7 +383,7 @@ function generateboard(max)
 function assigntable(e) {
    var loc = e.target.value;
    if (loc.length) {
-      e.target.parentElement.innerText = loc;
+      e.target.parentElement.innerText = "Table: "+loc;
    }
 }
 

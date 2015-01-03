@@ -49,7 +49,12 @@ function addplayer()
    element = document.createElement("span");
    element.innerText = name+" ("+rank+")";
    element.className += rank;
-   element.onclick = removeplayer;
+   var cancel = document.createElement("span");
+   cancel.innerText = "x";
+   cancel.className = "cancel";
+   cancel.onclick = removeplayer;
+
+   element.appendChild(cancel);
    slot.appendChild(element);
 }
 
@@ -57,9 +62,9 @@ function removeplayer(e) {
    var name = document.getElementById("newplayer");
    var rank = document.getElementById("newrank");
 
-   name.value = e.target.innerText.split('(')[0].trim();
-   rank.value = e.target.innerText.split('(')[1].split(')')[0].trim();
-   e.target.parentElement.removeChild(e.target);
+   name.value = e.target.parentElement.innerText.split('(')[0].trim();
+   rank.value = e.target.parentElement.innerText.split('(')[1].split(')')[0].trim();
+   e.target.parentElement.parentElement.removeChild(e.target.parentElement);
 }
 
 function seed_players()
