@@ -247,7 +247,7 @@ class ClubHandler(base_handler.BaseHandler):
 
 class TourneyHandler(base_handler.BaseHandler):
    def get(self, clubid, tname):
-      TEMPLATE = 'html/modifiedsingle.html'
+      TEMPLATE = 'html/ladder.html'
 
       create = 0
       user = users.get_current_user()
