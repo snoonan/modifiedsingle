@@ -1,22 +1,5 @@
-var wfoldin = 2; // After round n on of winners.
+var wfoldin = 3; // After round n on of winners.
 var lfoldin = 2; // Fold in n rounds of losses.
-
-var t_left = ["<td>",
-              "<td>",
-              "<td>",
-              "<td>",
-              "<td>",
-              "<td class=\"loseredge\">",
-              "<td class=\"loseredge\">",
-              "<td class=\"loseredge\">",
-              "<td class=\"loseredge matchedge\"><span id=\"m_{slot}\" win=\"{winner}\">#{slot}</span>",
-              "<td class=\"loseredge\">",
-              "<td class=\"loseredge\">",
-              "<td class=\"loseredge\">",
-              "<td class=\"loseredge\">",
-              "<td>",
-              "<td>",
-              "<td>"];
 
 var t_center4 = [
 "<td><td><td><td><td class=\"matchedge\"><span id=\"s_{slot}\" class=\"a_{match}\"></span><td><td>",
@@ -62,10 +45,9 @@ function generateboard(max)
    for (row = 0; row < max*2; row++) {
       var r = "";
       var base = max/2;
-      var nextbase = base + 2*(max/2);
+      var nextbase = base + 2*(max/4);
       for (i = 4; i <= Math.pow(2,wfoldin+1); i = i*2) {
          if (row % (i*2) == i) {
-            console.log("slot",Math.floor(row/(i*2))+base+1," ",row," ",row/(i*2));
             r = "<td class=\"loseredge matchedge\"><span id=\"m_{slot}\" class=\"{half}_{next}\">#{slot}</span>".format({
                  "slot":Math.floor(row/(i*2))+base+1,
                  "next":Math.floor(row/(i*4))+nextbase+1,
@@ -77,8 +59,12 @@ function generateboard(max)
             r = "<td>" + r;
          }
          base = nextbase;
-         nextbase = 2*max/(i*2);
+         console.log("b:",base);
+         nextbase = (max/i);
+         console.log("i:",nextbase,"m:",max,"i:",i);
+
          nextbase += base;
+         console.log("n:",nextbase);
       }
 
       if (row%4 == 2) {
@@ -104,24 +90,61 @@ function generateboard(max)
       var i;
       base = 0;
       nextbase = base + 1.5*(max/2);
+      baroffset = 0;
       for (i = 2; i <= max; i = i*2) {
-         if (row % (i*2) == i) {
-            r += "<td class=\"winedge matchedge\"><span id=\"m_{slot}\" class=\"{half}_{next}\">#{slot}</span>".format({
+         if (i != Math.pow(2,wfoldin+1)) {
+            if (row % (i*2) == i) {
+               r += "<td class=\"winedge matchedge\"><span id=\"m_{slot}\" class=\"{half}_{next}\">#{slot}</span>".format({
+                    "slot":Math.floor(row/(i*2))+base+1,
+                    "next":Math.floor(row/(i*4))+nextbase+1,
+                    "half":"ab".charAt(Math.floor((row%(i*4))/(i*2)))
+                  });
+
+            } else if ((row % (i*2) > i/2+baroffset) && (row % (i*2) <= 3*i/2+baroffset)) {
+               r += "<td class=\"winedge\">";
+            } else {
+               r += "<td>";
+            }
+            baroffset = 0;
+         } else {
+            foldbase = base + max/i;
+            nextbase = foldbase + max/i;
+            // Time to fold in winners
+
+            if (row % (i*2) == i) {
+               r += "<td class=\"winedge matchedge\"><td class=\"matchedge\"><span id=\"m_{slot}\" class=\"a_{next}\">#{slot}</span><td>".format({
                  "slot":Math.floor(row/(i*2))+base+1,
+                 "next":Math.floor(row/(i*2))+foldbase+1
+               });
+            } else if ((row-1) % (i*2) == i) {
+               r += "<td class=\"winedge\"><td><td class=\"winedge matchedge\"><span id=\"m_{slot}\" class=\"{half}_{next}\">#{slot}</span>".format({
+                 "slot":Math.floor(row/(i*2))+foldbase+1,
                  "next":Math.floor(row/(i*4))+nextbase+1,
                  "half":"ab".charAt(Math.floor((row%(i*4))/(i*2)))
                });
+            } else if ((row-2) % (i*2) == i) {
+               var winnerof = base - max/Math.pow(2,wfoldin+1);
+               winnerof += row/(i*2);
+               if (max != 8) {
+                  winnerof ^= 1;
+               }
+               winnerof += 1;
+               r += "<td class=\"winedge\">&nbsp;&nbsp;<td class=\"matchedge\"><span id=\"w_{slot}\" class=\"b_{next}\">#l_{slot}</span><td class=\"winedge\">".format({
+                 "slot":winnerof,
+                 "next":Math.floor(row/(i*2))+foldbase+1,
+                 "half":"ab".charAt(Math.floor((row%(i*4))/(i*2)))
+               });
+            } else if ((row % (i*2) > i/2+baroffset) && (row % (i*2) <= 3*i/2+baroffset)) {
+               r += "<td class=\"winedge\"><td><td>";
+            } else {
+               r += "<td><td><td>"
+            }
 
-         } else if ((row % (i*2) > i/2) && (row % (i*2) <= 3*i/2)) {
-            r += "<td class=\"winedge\">";
-         } else {
-            r += "<td>";
+            baroffset = 1; // Next column is offset
          }
          base = nextbase;
          nextbase = max/(i*2);
-         if (i == Math.pow(2,wfoldin)) {
-            nextbase *= 2;
-         } else if (i <= Math.pow(2,wfoldin)) {
+         if (i <= Math.pow(2,wfoldin)) {
             nextbase *= 1.5;
          }
          nextbase += base;
