@@ -1,5 +1,7 @@
 
-var tables = [12,11,10,9];
+var wfoldin = 3; // After round n on of winners.
+var lfoldin = 2; // Fold in n rounds of losses.
+
 var ranks = ["PRO","SP","AAA","AA","A","B","C"];
 var races ={"PRO":{"PRO":[5,5],"SP":[6,5],"AAA":[6,4],"AA":[6,3],"A":[7,3],"B":[7,2],"C":[8,2],"Bye":[0,0]},
         "SP" :{"PRO":[5,6],"SP":[5,5],"AAA":[5,4],"AA":[5,3],"A":[6,3],"B":[6,2],"C":[7,2],"Bye":[0,0]},
