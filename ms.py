@@ -13,6 +13,7 @@ import matches
 import clubs
 import tourneys
 import players
+import handicap
 
 class DataStore(webapp2.RequestHandler):
    def post(self):
@@ -107,6 +108,18 @@ class Create(webapp2.RequestHandler):
       bye.club = club.key
       bye.handicap = "Bye"
       bye = bye.put()
+
+class Race(webapp2.RequestHandler):
+   def post(self):
+      user = users.get_current_user()
+      r_name      = self.request.get('system')
+      r_ranks     = self.request.get('ranks')
+      r_races     = self.request.get('races')
+
+      hcap = handicap.Handicap(key=ndb.Key(handicap.Handicap, r_name))
+      hcap.ranks = r_ranks
+      hcap.races = str(r_races)
+      hcap.put()
 
 
 
@@ -274,6 +287,7 @@ class TourneyHandler(base_handler.BaseHandler):
 app = webapp2.WSGIApplication([(r'/Match/', DataStore),
                                (r'/Config/(.*)', Config),
                                (r'/Create/', Create),
+                               (r'/Race/', Race),
                                (r'/', IndexHandler),
                                (r'/Tourney/(.*)/create', CreateTourneyHandler),
                                (r'/Tourney/(.*)/(.*)', TourneyHandler),

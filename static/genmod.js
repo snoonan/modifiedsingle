@@ -107,6 +107,12 @@ function wfold(base, foldbase, nextbase, row, i, max, baroffset)
 function generateboard(max)
 {
    var row;
+   if (wfoldin < 0) {
+      wfoldin = Math.log2(max)+1+wfoldin;
+   }
+   if (lfoldin < 0) {
+      lfoldin = Math.log2(max)+1+lfoldin;
+   }
    var wfoldat = Math.pow(2, wfoldin);
    var lfoldat = Math.pow(2, lfoldin);
    // center column is name/blank/name/blank/...
