@@ -62,11 +62,10 @@ function addplayer()
    element = document.getElementById("createplayer");
    element.hidden = true;
 
-   element = document.getElementById("newplayer");
-   name = element.value;
-   element.value = ""
    element = document.getElementById("newrank");
    rank = element.value;
+   element = document.getElementById("newplayer");
+   name = element.value;
 
    var found;
    var i;
@@ -79,33 +78,7 @@ function addplayer()
       }
    }
    if (!found) {
-      var fname;
-      var lname;
-      element = document.getElementById("fname");
-      if (element.value == "") {
-         element.value = name;
-      }
-      fname = element.value;
-      element = document.getElementById("lname");
-      lname = element.value;
-
-      // Send new player record to server
-      var r = new XMLHttpRequest(); 
-      r.open("POST", "/newPlayer/", true);
-      r.onreadystatechange = function () {
-         if (r.readyState != 4 || r.status != 200) return; 
-         console.log(r.responseText);
-      };
-      var f = new FormData();
-
-      f.append("club",club);
-      f.append("name",name);
-      f.append("fname",fname);
-      f.append("lname",lname);
-      f.append("rank",rank);
-      r.send(f);
-
-
+      updateplayer();
    }
 
    nextplayer += 1
@@ -194,7 +167,7 @@ function seed_players()
 
    tourneyname = tname.value.replace(/[^a-zA-Z0-9]/g, "-")
 
-   history.pushState(undefined, tname, "/Toruney/"+club+"/"+tourneyname)
+   history.pushState(undefined, tname, "/Tourney/"+club+"/"+tourneyname)
 
    
 }
@@ -252,6 +225,7 @@ function fill_slots()
       }
       slot += 2;
       match_results(slot/2, player_a, rank_a, player_b, rank_b, 0 );
+      submit_match(slot/2, player_a, rank_a, 0, player_b, rank_b, 0, undefined )
    }
 }
 
@@ -311,31 +285,6 @@ function initplayers(players)
    }
 }
 
-function submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, target_b, winner )
-{
-   var r = new XMLHttpRequest(); 
-   r.open("POST", "/Match/", true);
-   r.onreadystatechange = function () {
-      if (r.readyState != 4 || r.status != 200) return; 
-      console.log(r.responseText);
-   };
-   var f = new FormData();
-
-   f.append("club",club);
-   f.append("matchid",matchid);
-   f.append("tourney",tourneyname);
-   f.append("playerA",player_a);
-   f.append("handicapA",rank_a);
-   f.append("scoreA",0);
-   f.append("targetA",target_a);
-   f.append("playerB",player_b);
-   f.append("handicapB",rank_b);
-   f.append("scoreB",0);
-   f.append("targetB",target_b);
-   f.append("winner",winner);
-   r.send(f);
-}
-
 function adddummy() {
    var name = document.getElementById("newplayer");
    var rank = document.getElementById("newrank");
@@ -345,4 +294,30 @@ function adddummy() {
       rank.value = ranks[nextplayer%ranks.length];
       addplayer();
    }
+}
+function updateplayer()
+{
+   var r = new XMLHttpRequest(); 
+   var name  = document.getElementById("newplayer").value;
+   var fname = document.getElementById("fname").value;
+   var lname = document.getElementById("lname").value;
+   var rank  = document.getElementById("newrank").value;
+
+   if (fname == "") {
+      fname = name;
+   }
+
+   r.open("POST", "/Player/"+club+"/"+name, true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return; 
+      console.log(r.responseText);
+   };
+   var f = new FormData();
+   f.append("club",club);
+   f.append("name",name);
+   f.append("fname",fname);
+   f.append("lname",lname);
+   f.append("rank",rank);
+   f.append("op","update");
+   r.send(f);
 }

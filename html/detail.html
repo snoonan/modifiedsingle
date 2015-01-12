@@ -6,9 +6,32 @@
 <link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
 </head>
 <div id="player">
-ID:<span {{editable}} id="newplayer">{{player.name}}</span><br>
-Name:<span {{editable}} id="fname">{{player.firstName}}</span> <span {{editable}} id="lname">{{player.lastName}}</span><br>
-Rank:<select {{readonly}} id="newrank"></select>
+ID:
+{%- if create %}
+ <input id="name" value="{{player.name}}">
+{%- else %}
+ {{player.name}}
+{%- endif %}
+<br>
+Name:
+{%- if create %}
+ <input id="fname" value="{{player.firstName}}">
+ <input id="lname" value="{{player.lastName}}">
+{%- else %}
+ {{player.firstName}} {{player.lastName}}
+{%- endif %}
+<br>
+Handicap:
+{%- if create %}
+ <input id="rank" value="{{player.handicap}}">
+{%- else %}
+{{player.handicap}}
+{%- endif %}
+<br>
+{%- if create %}
+<button onclick='updateplayer("update")'>Update</button>
+<button onclick='updateplayer("delete")'>Delete</button>
+{%- endif %}
 </div>
   <table id="players-matches">
     <thead>
@@ -47,30 +70,27 @@ Rank:<select {{readonly}} id="newrank"></select>
     </tbody>
   </table>
 
-<script type="text/javascript" src="/static/config.js"></script>
 <script type="text/javascript">
-
-function initranks()
+function updateplayer(op)
 {
-   var sel = document.getElementById("newrank");
-   var i;
+   var r = new XMLHttpRequest(); 
+   r.open("POST", "/Player/{{club.key.id()}}/{{ player.name }}", true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return; 
+      console.log(r.responseText);
+   };
+   var f = new FormData();
+   var name  = document.getElementById("name").value;
+   var fname = document.getElementById("fname").value;
+   var lname = document.getElementById("lname").value;
+   var rank  = document.getElementById("rank").value;
 
-   for (i=0; i < ranks.length; i++) {
-      var e = document.createElement("option");
-      e.value = ranks[i];
-      e.innerText = ranks[i];
-      sel.appendChild(e);
-   }
+   f.append("club","{{club.key.id()}}");
+   f.append("name",name);
+   f.append("fname",fname);
+   f.append("lname",lname);
+   f.append("rank",rank);
+   f.append("op",op);
+   r.send(f);
 }
-
-initranks();
-
-   var prank = document.getElementById("newrank");
-   var rankidx;
-   for (rankidx = 0; rankidx < prank.options.length; rankidx++) {
-      if (prank.options[rankidx].value == "{{player.handicap}}") {
-         break;
-      }
-   }
-   prank.selectedIndex = rankidx;
 </script>

@@ -10,9 +10,14 @@ Done:
 * 64+ player grids (Edgies has a bigger board)
 * remove player from waiting list
 * edit rank during tourney
+* Paid marks
+* player stat page
+* better new player entry
+* player info edit (owners only)
+* Late players (needs more work)
+* Table assignment ui added
+
 
 current TODO (in approximate order)
 * UI changes (continuous)
-* Late players
-* buyback?
-* out-of-line player adjust
+* buyback? (just add player again...)

@@ -35,7 +35,7 @@ function lfold(base, foldbase, nextbase, row, i, max, baroffset)
       loserof -= Math.floor(row/(i*2));
       loserof -= 1;
       if ((i) != max) {
-         loserof ^= 1;
+//         loserof ^= 1;
       }
       loserof += 1;
       r = "<td class=\"loseredge\"><td class=\"matchedge\"><span id=\"l_{slot}\" class=\"b_{next}\">#l_{slot}</span><td class=\"loseredge\">&nbsp;&nbsp;".format({
@@ -196,13 +196,13 @@ function generateboard(max)
       table_node.appendChild(child);
    }
    var open;
-   if (window.location.hash.length == 2) {
+   if (window.location.hash.length == 3) {
+      open = document.createElement("div");
+      document.body.appendChild(open)
+   } else {
       open = document.createElement("td");
       open.setAttribute("rowspan",max-2);
       table_node.children[0].appendChild(open)
-   } else if (window.location.hash.length == 3) {
-      open = document.createElement("div");
-      document.body.appendChild(open)
    }
    if (open) {
    var tab;

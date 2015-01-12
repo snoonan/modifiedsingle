@@ -34,7 +34,6 @@ class DataStore(webapp2.RequestHandler):
 
       club = clubs.Club.get_by_id(r_club)
 
-
       if user not in club.owners:
          self.response.clear()
          self.response.set_status(405)
@@ -320,12 +319,15 @@ class PlayerDetailHandler(base_handler.BaseHandler):
       TEMPLATE = 'html/detail.html'
       user = users.get_current_user()
       login = None
+      create=False
 
       club = clubs.Club.get_by_id(clubid)
       if user == None:
          login = "<a href="+users.create_login_url()+">login</a>"
       else:
          login = "Logged in as "+user.nickname()
+         if user in club.owners or user.email() in club.invited:
+            create = True
 
       matchlist = []
       player = players.Player.query(ndb.AND(players.Player.name == name, players.Player.club == club.key)).fetch(1)
@@ -337,12 +339,42 @@ class PlayerDetailHandler(base_handler.BaseHandler):
 
       context = {'club': club,
                  'player': player,
-                 'readonly':'disabled',
-                 'editable':'',
-                 #'editable':'contenteditable',
+                 'create': create,
                  'matches': matchlist,
                  'login': login}
       self.render_response(TEMPLATE, **context)
+
+   def post(self, clubid, name):
+      r_name   = self.request.get('name')
+      r_fname  = self.request.get('fname')
+      r_lname  = self.request.get('lname')
+      r_rank   = self.request.get('rank')
+      r_op     = self.request.get('op')
+
+      user = users.get_current_user()
+      club = clubs.Club.get_by_id(clubid)
+
+      if user not in club.owners:
+         self.response.clear()
+         self.response.set_status(405)
+         self.response.out.write("Not authorized")
+         return
+      player = players.Player.query(ndb.AND(players.Player.name == name, players.Player.club == club.key)).fetch(1)
+      if player:
+         player = player[0]
+      else:
+         player = players.Player()
+         player.club = club.key
+
+      if r_op == 'update':
+         player.name = r_name
+         player.firstName = r_fname
+         player.lastName = r_lname
+         player.handicap = r_rank
+         player.put()
+      elif r_op == 'delete':
+         player.key.delete()
+
 
 
 class PlayerListHandler(base_handler.BaseHandler):
