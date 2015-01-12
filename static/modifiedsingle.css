@@ -1,3 +1,12 @@
+#players span{
+   padding:10px;
+}
+.paid{
+   color:#00a000;
+}
+.unpaid{
+   color:red;
+}
 .cancel{
    color:red;
 }

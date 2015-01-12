@@ -1,22 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
+<meta charset="utf-8" />
 <link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
 </head>
-<div hidden id="loading">
-Loading ladder...
-</div>
+<table id="board">
+</table>
 <div id="pregame">
 Tourneyment name<input id="tname"><br>
+<div id="playerui">
 <select id="player" onchange="update_player()"><option value>New player</option></select>
-<input id="newplayer"><select id="newrank"></select>
-<button onclick="addplayer()">Enter</button><br>
-<button onclick="seed_players()">Start Tournement</button>
+<button id="addplayer" onclick="addplayer()">Enter</button>
+<button onclick="newplayer()">New</button><br>
+<div hidden id="createplayer">
+ID:<input id="newplayer" oninput="validate()"><br>
+Name:<input id="fname"> <input id="lname"><br>
+Rank:<select id="newrank"></select>
+</div>
+</div>
+<button id="start" disabled onclick="seed_players()">Start Tournement</button>
 <div id="players">
 </div>
-<button onclick="adddummy()">Add 10 more</button>
+<button hidden id="testing" onclick="adddummy()">Add 10 more</button>
 <script type="text/javascript" src="/static/config.js"></script>
 <script type="text/javascript">
- var nextplayer=10;
-
   var   club = "{{club.key.id()}}";
 </script>
 <script type="text/javascript" src="/static/tourneycreate.js"></script>
+<script type="text/javascript" src="/static/ladder.js"></script>
+<script type="text/javascript" src="/static/genmod.js"></script>

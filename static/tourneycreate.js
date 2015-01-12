@@ -31,6 +31,27 @@ function update_player()
 
 }
 
+function validate()
+{
+   var element;
+   var name;
+   var good;
+   var i;
+
+   element = document.getElementById("newplayer");
+   name = element.value;
+   good = document.getElementById("addplayer");
+   good.disabled = false;
+   element.className = "";
+   for (i in players) {
+      if (name == players[i]["name"] ) {
+         good.disabled = true;
+         element.className = 'cancel';
+         return;
+      }
+   }
+}
+
 function addplayer()
 {
    var slot;
@@ -38,10 +59,54 @@ function addplayer()
    var name;
    var rank;
 
+   element = document.getElementById("createplayer");
+   element.hidden = true;
+
    element = document.getElementById("newplayer");
    name = element.value;
+   element.value = ""
    element = document.getElementById("newrank");
    rank = element.value;
+
+   var found;
+   var i;
+
+   found = false;
+   for (i in players) {
+      if (name == players[i]["name"] ) {
+         found = true;
+         break;
+      }
+   }
+   if (!found) {
+      var fname;
+      var lname;
+      element = document.getElementById("fname");
+      if (element.value == "") {
+         element.value = name;
+      }
+      fname = element.value;
+      element = document.getElementById("lname");
+      lname = element.value;
+
+      // Send new player record to server
+      var r = new XMLHttpRequest(); 
+      r.open("POST", "/newPlayer/", true);
+      r.onreadystatechange = function () {
+         if (r.readyState != 4 || r.status != 200) return; 
+         console.log(r.responseText);
+      };
+      var f = new FormData();
+
+      f.append("club",club);
+      f.append("name",name);
+      f.append("fname",fname);
+      f.append("lname",lname);
+      f.append("rank",rank);
+      r.send(f);
+
+
+   }
 
    nextplayer += 1
 
@@ -49,21 +114,43 @@ function addplayer()
    element = document.createElement("span");
    element.innerText = name+" ("+rank+")";
    element.className += rank;
+   var paid = document.createElement("span");
+   paid.innerText = "$";
+   paid.className = "unpaid";
+   paid.onclick = playerpaid;
+   element.insertBefore(paid, element.firstChild);
    var cancel = document.createElement("span");
    cancel.innerText = "x";
    cancel.className = "cancel";
    cancel.onclick = removeplayer;
+   document.getElementById('start').disabled = true;
 
    element.appendChild(cancel);
    slot.appendChild(element);
+}
+
+function newplayer()
+{
+   var element = document.getElementById("createplayer");
+   element.hidden = false;
+}
+
+function playerpaid(e)
+{
+   e.target.parentElement.children[0].className = 'paid';
+   if (document.getElementsByClassName('unpaid').length == 0) {
+      document.getElementById('start').disabled = false;
+   } else {
+      document.getElementById('start').disabled = true;
+   }
 }
 
 function removeplayer(e) {
    var name = document.getElementById("newplayer");
    var rank = document.getElementById("newrank");
 
-   name.value = e.target.parentElement.innerText.split('(')[0].trim();
-   rank.value = e.target.parentElement.innerText.split('(')[1].split(')')[0].trim();
+   name.value = e.target.parentElement.childNodes[1].data.split('(')[0].trim();
+   rank.value = e.target.parentElement.childNodes[1].data.split('(')[1].split(')')[0].trim();
    e.target.parentElement.parentElement.removeChild(e.target.parentElement);
 }
 
@@ -86,11 +173,10 @@ function seed_players()
    }
    var pre = document.getElementById("pregame");
    pre.hidden = true;
-   var pre = document.getElementById("loading");
-   pre.hidden = false;
 
    tourneydate = Math.floor(Date.now()/1000);
    var tname = document.getElementById("tname");
+
 
    var r = new XMLHttpRequest(); 
    r.open("POST", "/Tourney/"+club+"/create", true);
@@ -108,6 +194,9 @@ function seed_players()
 
    tourneyname = tname.value.replace(/[^a-zA-Z0-9]/g, "-")
 
+   history.pushState(undefined, tname, "/Toruney/"+club+"/"+tourneyname)
+
+   
 }
 
 function fill_slots()
@@ -146,24 +235,24 @@ function fill_slots()
    var player_b;
    var rank_b;
 
-
+   canupdate = true;
+   generateboard(max);
 
    while (slot < max) {
       var p = plist.pop();
-      player_a = p.innerText.split('(')[0].trim();
+      player_a = p.childNodes[1].data.split('(')[0].trim();
       rank_a = p.className;
       if (byes.indexOf(slot/2+1) != -1) {
          player_b = "Bye";
          rank_b = "Bye";
       } else {
          p = plist.pop();
-         player_b = p.innerText.split('(')[0].trim();
+         player_b = p.childNodes[1].data.split('(')[0].trim();
          rank_b = p.className;
       }
       slot += 2;
-      submit_match(slot/2, player_a, rank_a, races[rank_a][rank_b][0], player_b, rank_b, races[rank_a][rank_b][1], 0 );
+      match_results(slot/2, player_a, rank_a, player_b, rank_b, 0 );
    }
-   setTimeout(function () { window.location.pathname = "/Tourney/"+club+"/"+tourneyname; }, 5000);
 }
 
 //document.onready = function() {

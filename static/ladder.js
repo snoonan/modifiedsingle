@@ -10,6 +10,64 @@ var players;
 var nextplayer = 0;
 var maxplayer = 8;
 
+function update_player()
+{
+   var player = document.getElementById("player");
+   var pname = document.getElementById("newplayer");
+   var prank = document.getElementById("newrank");
+
+   pname.value = player.value;
+   var rank = player.options[player.selectedIndex].innerText;
+   rank = rank.split("(")[1];
+   rank = rank.split(")")[0];
+
+   var rankidx;
+   for (rankidx = 0; rankidx < prank.options.length; rankidx++) {
+      if (prank.options[rankidx].value == rank) {
+         break;
+      }
+   }
+   prank.selectedIndex = rankidx;
+
+}
+
+function lateplayer()
+{
+   var slot;
+   var slot,element;
+   var name;
+   var rank;
+
+   element = document.getElementById("newplayer");
+   name = element.value;
+   element = document.getElementById("newrank");
+   rank = element.value;
+
+   slot = element.parentNode.parentNode;
+
+   var stash = document.getElementById("stash");
+   var edit = document.getElementById("addplayer");
+   stash.appendChild(edit); // Put away till next time
+
+
+   element = document.createElement("span");
+   element.innerText = name;
+   element.innerText += " ("+rank+")";
+   element.className += rank;
+   slot.appendChild(element);
+
+   match(slot.className.slice(2));
+}
+
+function picklate(e)
+{
+  var slot = e.target.parentElement.parentElement;
+  var edit = document.getElementById("addplayer");
+
+  slot.innerHTML="";
+  slot.appendChild(edit);
+}
+
 function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
 {
    if (matchid <= maxplayers/2) {
@@ -18,7 +76,12 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
       slot = document.getElementById("s_"+(((matchid-1)*2)+1));
       element = document.createElement("span");
       element.innerText = player_a;
-      if (player_a != "Bye") {
+      if (player_a == "Bye") {
+         var late = document.createElement('button');
+         late.innerText = 'Add';
+         late.onclick = picklate;
+         element.appendChild(late);
+      } else {
          element.innerText += " ("+rank_a+")";
       }
       element.className += rank_a;
@@ -26,7 +89,12 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
       slot = document.getElementById("s_"+(((matchid-1)*2)+2));
       element = document.createElement("span");
       element.innerText = player_b;
-      if (player_b != "Bye") {
+      if (player_b == "Bye") {
+         var late = document.createElement('button');
+         late.innerText = 'Add';
+         late.onclick = picklate;
+         element.appendChild(late);
+      } else {
          element.innerText += " ("+rank_b+")";
       }
       element.className += rank_b;
@@ -191,6 +259,9 @@ function winner(matchid)
 
    matchparent.innerHTML = "";
    matchparent.appendChild(winnerelem.cloneNode(true));
+   if (matchparent.children[0].childElementCount) {
+      matchparent.children[0].removeChild(matchparent.children[0].children[0]);
+   }
    var cancel = document.createElement("select");
    cancel.innerHTML = "<option><option>bump skill<option>lower skill<option>change winner";
    cancel.style.width="20px";
@@ -202,6 +273,9 @@ function winner(matchid)
    if (loserslot) {
       loserslot.innerHTML = "";
       loserslot.appendChild(loserelem.cloneNode(true));
+      if (loserslot.children[0].childElementCount) {
+         loserslot.children[0].removeChild(loserslot.children[0].children[0]);
+      }
       var cancel = document.createElement("select");
       cancel.innerHTML = "<option><option>bump skill<option>lower skill<option>change winner";
       cancel.style.width="20px";
@@ -280,7 +354,6 @@ function assigntable(e)
 var to_submit = {};
 function submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, target_b, winner )
 {
-   canupdate = false;
    if (canupdate == false) {
       return;
    }
@@ -332,5 +405,46 @@ function _submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, ta
    f.append("winner",winner);
    console.log("!!m:"+matchid+" w:"+winner);
    r.send(f);
+}
+
+
+function load_config()
+{
+   var r = new XMLHttpRequest(); 
+   r.open("GET", "/Config/"+club, true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return; 
+      console.log(r.responseText);
+      eval(r.responseText);
+      document.title = clubname;
+      initranks(ranks);
+      initplayers(players);
+   };
+   r.send();
+}
+
+function initranks(ranks)
+{
+   var sel = document.getElementById("newrank");
+   var i;
+
+   for (i=0; i < ranks.length; i++) {
+      var e = document.createElement("option");
+      e.value = ranks[i];
+      e.innerText = ranks[i];
+      sel.appendChild(e);
+   }
+}
+function initplayers(players)
+{
+   var sel = document.getElementById("player");
+   var i;
+
+   for (i=0; i < players.length; i++) {
+      var e = document.createElement("option");
+      e.value = players[i].name;
+      e.innerText = players[i].name+" ("+players[i].rank+")";
+      sel.appendChild(e);
+   }
 }
 

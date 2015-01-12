@@ -3,6 +3,12 @@
 </head>
 <table id="board">
 </table>
+<div hidden id="stash">
+<input id="tname">
+<div id="addplayer">
+<select id="player" onchange="update_player()"><option value>New player</option></select>
+<input id="newplayer"><select id="newrank"></select>
+<button onclick="lateplayer()">Enter</button><br>
 <script type="text/javascript" src="/static/config.js"></script>
 <script type="text/javascript" src="/static/ladder.js"></script>
 <script type="text/javascript" src="/static/genmod.js"></script>
@@ -15,5 +21,7 @@
    {% for m in matches %}
      match_results({{m.matchid}},"{{m.playerA.get().name}}", "{{m.handicapA}}", "{{m.playerB.get().name}}", "{{m.handicapB}}", {{m.winner}});
    {% endfor %}
+   load_config();
    send_matches();
 </script>
+<script type="text/javascript" src="/static/tourneycreate.js"></script>

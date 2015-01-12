@@ -109,6 +109,33 @@ class Create(webapp2.RequestHandler):
       bye.handicap = "Bye"
       bye = bye.put()
 
+class Invite(webapp2.RequestHandler):
+   def post(self):
+      user = users.get_current_user()
+      r_club      = self.request.get('club')
+      r_email      = self.request.get('email')
+
+      user = users.get_current_user()
+
+      logging.info(r_club)
+      club = clubs.Club.get_by_id(r_club)
+      if club == None:
+         self.response.clear()
+         self.response.set_status(405)
+         self.response.out.write("Not authorized")
+         return
+      if user not in club.owners and user.email() not in club.invited:
+         self.response.clear()
+         self.response.set_status(405)
+         self.response.out.write("Not authorized")
+         return
+      if user not in club.owners:
+         club.owners.append(user)
+
+      club.invited.append(r_email)
+      club.put()
+      club = clubs.Club.get_by_id(r_club)
+
 class Race(webapp2.RequestHandler):
    def post(self):
       user = users.get_current_user()
@@ -141,8 +168,8 @@ class Config(webapp2.RequestHandler):
          self.response.out.write("Not authorized")
          return
       if user not in club.owners:
-         club.owner.append(user.user_id())
-         club.put()
+         club.owners.append(user)
+         club = club.put()
 
       plist = players.Player.query(players.Player.club == club.key).order(players.Player.name).fetch()
       self.response.set_status(200)
@@ -199,8 +226,8 @@ class CreateTourneyHandler(base_handler.BaseHandler):
          self.response.out.write("Not authorized")
          return
       if user not in club.owners:
-         club.owner.append(user.user_id())
-         club.put()
+         club.owners.append(user)
+         club = club.put()
 
       tourney = tourneys.Tourney()
       tourney.slug = slug
@@ -245,6 +272,9 @@ class ClubHandler(base_handler.BaseHandler):
       else:
          login = "Logged in as "+user.nickname()
          if user in club.owners or user.email() in club.invited:
+            if user not in club.owners:
+               club.owners.append(user)
+               club = club.put()
             create = True
 
       dates = tourneys.Tourney.query(tourneys.Tourney.club == ndb.Key(clubs.Club, clubid)).fetch()
@@ -284,14 +314,68 @@ class TourneyHandler(base_handler.BaseHandler):
                  'login': login}
       self.render_response(TEMPLATE, **context)
 
+
+class PlayerDetailHandler(base_handler.BaseHandler):
+   def get(self, clubid, name):
+      TEMPLATE = 'html/detail.html'
+      user = users.get_current_user()
+      login = None
+
+      club = clubs.Club.get_by_id(clubid)
+      if user == None:
+         login = "<a href="+users.create_login_url()+">login</a>"
+      else:
+         login = "Logged in as "+user.nickname()
+
+      matchlist = []
+      player = players.Player.query(ndb.AND(players.Player.name == name, players.Player.club == club.key)).fetch(1)
+      if (player == []):
+         player = {'name': name}
+      else:
+         player = player[0]
+         matchlist = matches.Match.query(ndb.OR(matches.Match.playerA == player.key, matches.Match.playerB == player.key)).fetch()
+
+      context = {'club': club,
+                 'player': player,
+                 'readonly':'disabled',
+                 'editable':'',
+                 #'editable':'contenteditable',
+                 'matches': matchlist,
+                 'login': login}
+      self.render_response(TEMPLATE, **context)
+
+
+class PlayerListHandler(base_handler.BaseHandler):
+   def get(self, clubid):
+      TEMPLATE = 'html/list.html'
+      user = users.get_current_user()
+      login = None
+
+      club = clubs.Club.get_by_id(clubid)
+      if user == None:
+         login = "<a href="+users.create_login_url()+">login</a>"
+      else:
+         login = "Logged in as "+user.nickname()
+
+      plist = players.Player.query(players.Player.club == club.key).order(players.Player.name).fetch()
+      context = {'club': club,
+                 'players': plist,
+                 'login': login}
+      self.render_response(TEMPLATE, **context)
+
+
+
 app = webapp2.WSGIApplication([(r'/Match/', DataStore),
                                (r'/Config/(.*)', Config),
                                (r'/Create/', Create),
+                               (r'/Invite/', Invite),
                                (r'/Race/', Race),
                                (r'/', IndexHandler),
                                (r'/Tourney/(.*)/create', CreateTourneyHandler),
                                (r'/Tourney/(.*)/(.*)', TourneyHandler),
                                (r'/Clubs/(.*)', ClubHandler),
+                               (r'/Player/(.*)/(.*)', PlayerDetailHandler),
+                               (r'/Player/(.*)', PlayerListHandler),
                               ],
                           debug=True,
                           config=base_handler.CONFIG)

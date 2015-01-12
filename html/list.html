@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Players at {{club.name}}</title>
+<meta charset="utf-8" />
+<link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
+</head>
+<div id="players">
+  <table id="players-summary">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>H'cap</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in players %}
+      <tr>
+        <td>{{ entry.name }}</td>
+        <td><a href="/Player/{{club.key.id()}}/{{ entry.name }}">
+            {{ entry.firstName }} {{ entry.lastName }}</a></td>
+        <td>{{ entry.handicap }}</td>
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+
+</div>

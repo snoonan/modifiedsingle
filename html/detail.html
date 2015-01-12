@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>{{player.name}} at {{club.name}}</title>
+<meta charset="utf-8" />
+<link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
+</head>
+<div id="player">
+ID:<span {{editable}} id="newplayer">{{player.name}}</span><br>
+Name:<span {{editable}} id="fname">{{player.firstName}}</span> <span {{editable}} id="lname">{{player.lastName}}</span><br>
+Rank:<select {{readonly}} id="newrank"></select>
+</div>
+  <table id="players-matches">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Match id</th>
+        <th>Player A</th>
+        <th>Handicap</th>
+        <th>Player B</th>
+        <th>Handicap</th>
+        <th>Race</th>
+        <th>Winner</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in matches |sort(attribute="matchid")|sort(attribute="tourney") %}
+      <tr>
+        <td><a href="/Tourneys/{{club.key.id()}}/{{ entry.tourney.get().slug }}">
+            {{ entry.tourney.get().name }}</a></td>
+        <td>{{ entry.matchid }}</td>
+        <td><a href="/Player/{{club.key.id()}}/{{ entry.playerA.get().name }}">
+            {{ entry.playerA.get().firstName }} {{ entry.playerA.get().lastName }}</a></td>
+        <td>{{ entry.handicapA }}</td>
+        <td><a href="/Player/{{club.key.id()}}/{{ entry.playerB.get().name }}">
+            {{ entry.playerB.get().firstName }} {{ entry.playerB.get().lastName }}</a></td>
+        <td>{{ entry.handicapB }}</td>
+        <td>{{ entry.targetA }}/{{ entry.targetB }}</td>
+        <td>
+         {%- if entry.winner %}
+            {{entry.playerA.get().name}}
+         {%- else %}
+            {{entry.playerB.get().name}}
+         {%- endif %}
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+
+<script type="text/javascript" src="/static/config.js"></script>
+<script type="text/javascript">
+
+function initranks()
+{
+   var sel = document.getElementById("newrank");
+   var i;
+
+   for (i=0; i < ranks.length; i++) {
+      var e = document.createElement("option");
+      e.value = ranks[i];
+      e.innerText = ranks[i];
+      sel.appendChild(e);
+   }
+}
+
+initranks();
+
+   var prank = document.getElementById("newrank");
+   var rankidx;
+   for (rankidx = 0; rankidx < prank.options.length; rankidx++) {
+      if (prank.options[rankidx].value == "{{player.handicap}}") {
+         break;
+      }
+   }
+   prank.selectedIndex = rankidx;
+</script>
