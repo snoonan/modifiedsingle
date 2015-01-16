@@ -1,52 +1,15 @@
-var tourneydate;
-var canupdate = false;
+// Needs:
+// club         - passed to rpc with match
+// tourneyname  - passed to rpc with match
+// canupdate    - weither to talk to server
+// maxplayers   - starting players determination 
 
-// Config
-var club;
-var clubname;
-var players;
-// end config
-
-var nextplayer = 0;
-var maxplayer = 8;
-
-function update_player()
+function late_insert_player(name, rank)
 {
-   var player = document.getElementById("player");
-   var pname = document.getElementById("newplayer");
-   var prank = document.getElementById("newrank");
-
-   pname.value = player.value;
-   var rank = player.options[player.selectedIndex].innerText;
-   rank = rank.split("(")[1];
-   rank = rank.split(")")[0];
-
-   var rankidx;
-   for (rankidx = 0; rankidx < prank.options.length; rankidx++) {
-      if (prank.options[rankidx].value == rank) {
-         break;
-      }
-   }
-   prank.selectedIndex = rankidx;
-
-}
-
-function lateplayer()
-{
-   var slot;
-   var slot,element;
-   var name;
-   var rank;
-
-   element = document.getElementById("newplayer");
-   name = element.value;
-   element = document.getElementById("newrank");
-   rank = element.value;
-
-   slot = element.parentNode.parentNode;
-
-   var stash = document.getElementById("stash");
-   var edit = document.getElementById("addplayer");
+   var element;
+   var stash = document.getElementById("pregame");
+   var edit = document.getElementById("playerui");
+   var slot = edit.parentNode;
    stash.appendChild(edit); // Put away till next time
 
 
@@ -56,18 +19,34 @@ function lateplayer()
    element.className += rank;
    slot.appendChild(element);
 
-   match(slot.className.slice(2));
+   var matchid = slot.className.slice(2);
+
+   element = document.getElementById("m_"+matchid);
+   element.removeChild(element.children[0])
+   element = document.getElementById("l_"+matchid);
+   if (element) {
+      element.removeChild(element.children[0])
+   }
+   element = document.getElementById("w_"+matchid);
+   if (element) {
+      element.removeChild(element.children[0])
+   }
+
+   match(matchid);
 }
 
 function picklate(e)
 {
   var slot = e.target.parentElement.parentElement;
-  var edit = document.getElementById("addplayer");
+  var edit = document.getElementById("playerui");
+
+  insert_player = late_insert_player;
 
   slot.innerHTML="";
   slot.appendChild(edit);
 }
 
+// Pass in from page load, existing match so no need to send it on to server
 function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
 {
    if (matchid <= maxplayers/2) {
@@ -372,23 +351,30 @@ function submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, tar
 
 function send_matches()
 {
-   for (var i in to_submit) {
-      if (!to_submit.hasOwnProperty(i)) {
+   var send_list = to_submit;
+   to_submit = {};
+
+   for (var i in send_list) {
+      if (!send_list.hasOwnProperty(i)) {
          continue;
       }
-      _submit_match(i, to_submit[i]["player_a"],to_submit[i]["rank_a"],to_submit[i]["target_a"], to_submit[i]["player_b"],to_submit[i]["rank_b"],to_submit[i]["target_b"], to_submit[i]["winner"]);
+      _submit_match(i, send_list[i]["player_a"],send_list[i]["rank_a"],send_list[i]["target_a"], send_list[i]["player_b"],send_list[i]["rank_b"],send_list[i]["target_b"], send_list[i]["winner"]);
    }
-   to_submit = {};
 }
 
 function _submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, target_b, winner )
 {
    var r = new XMLHttpRequest(); 
+
    r.open("POST", "/Match/", true);
    r.onreadystatechange = function () {
-      if (r.readyState != 4 || r.status != 200) return; 
-      console.log(r.responseText);
+      if (r.readyState != 4) { return; }
+      if (r.status != 200)
+      {
+         submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, target_b, winner )
+      }
    };
+
    var f = new FormData();
 
    f.append("club",club);
@@ -403,48 +389,5 @@ function _submit_match(matchid, player_a, rank_a, target_a, player_b, rank_b, ta
    f.append("scoreB",0);
    f.append("targetB",target_b);
    f.append("winner",winner);
-   console.log("!!m:"+matchid+" w:"+winner);
    r.send(f);
 }
-
-
-function load_config()
-{
-   var r = new XMLHttpRequest(); 
-   r.open("GET", "/Config/"+club, true);
-   r.onreadystatechange = function () {
-      if (r.readyState != 4 || r.status != 200) return; 
-      console.log(r.responseText);
-      eval(r.responseText);
-      document.title = clubname;
-      initranks(ranks);
-      initplayers(players);
-   };
-   r.send();
-}
-
-function initranks(ranks)
-{
-   var sel = document.getElementById("newrank");
-   var i;
-
-   for (i=0; i < ranks.length; i++) {
-      var e = document.createElement("option");
-      e.value = ranks[i];
-      e.innerText = ranks[i];
-      sel.appendChild(e);
-   }
-}
-function initplayers(players)
-{
-   var sel = document.getElementById("player");
-   var i;
-
-   for (i=0; i < players.length; i++) {
-      var e = document.createElement("option");
-      e.value = players[i].name;
-      e.innerText = players[i].name+" ("+players[i].rank+")";
-      sel.appendChild(e);
-   }
-}
-

@@ -85,7 +85,8 @@ class DataStore(webapp2.RequestHandler):
       match.scoreB = int(r_scoreB)
       match.targetB = int(r_targetB)
       match.handicapB = r_handicapB
-      match.winner = int(r_winner)
+      if (r_winner != 'undefined'):
+         match.winner = int(r_winner)
       match.put()
       self.response.clear()
       self.response.set_status(200)
@@ -289,7 +290,7 @@ class ClubHandler(base_handler.BaseHandler):
 
 class TourneyHandler(base_handler.BaseHandler):
    def get(self, clubid, tname):
-      TEMPLATE = 'html/ladder.html'
+      TEMPLATE = 'html/tourneycreate.html'
 
       create = 0
       user = users.get_current_user()

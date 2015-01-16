@@ -3,11 +3,21 @@
 <head>
 <meta charset="utf-8" />
 <link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
+{%- if tourney %}
+<title>{{tourney.name}} at {{club.name}}</title>
+{%- else %}
+<title>New tournement at {{club.name}}</title>
+{%- endif %}
 </head>
 <table id="board">
 </table>
+
+{%- if tourney %}
+<div hidden id="pregame">
+{%- else %}
 <div id="pregame">
-Tourneyment name<input id="tname"><br>
+{%- endif %}
+Tourneyment name<input id="tname" onchange="tname_set()"><br>
 <div id="playerui">
 <select id="player" onchange="update_player()"><option value>New player</option></select>
 <button id="addplayer" onclick="addplayer()">Enter</button>
@@ -18,14 +28,27 @@ Name:<input id="fname"> <input id="lname"><br>
 Rank:<select id="newrank"></select>
 </div>
 </div>
-<button id="start" disabled onclick="seed_players()">Start Tournement</button>
+<button id="start" disabled onclick="seed_players()">Start Tournement</button><br>
+<span id="player_count">no</span> players
 <div id="players">
 </div>
-<button hidden id="testing" onclick="adddummy()">Add 10 more</button>
-<script type="text/javascript" src="/static/config.js"></script>
 <script type="text/javascript">
   var   club = "{{club.key.id()}}";
+  var   clubname = "{{club.name}}";
+  var   canupdate = {{create}};
 </script>
-<script type="text/javascript" src="/static/tourneycreate.js"></script>
-<script type="text/javascript" src="/static/ladder.js"></script>
+<script type="text/javascript" src="/static/config.js"></script>
+<script type="text/javascript" src="/static/signup.js"></script>
+<script type="text/javascript" src="/static/newplayer.js"></script>
 <script type="text/javascript" src="/static/genmod.js"></script>
+<script type="text/javascript" src="/static/ladder.js"></script>
+<script type="text/javascript">
+{%- if tourney %}
+  var   tourneyname = "{{tourney.slug}}";
+   generateboard({{tourney.size}});
+   {% for m in matches %}
+     match_results({{m.matchid}},"{{m.playerA.get().name}}", "{{m.handicapA}}", "{{m.playerB.get().name}}", "{{m.handicapB}}", {{m.winner}});
+   {% endfor %}
+   send_matches();
+{%- endif %}
+</script>

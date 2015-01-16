@@ -1,3 +1,5 @@
+var maxplayers;
+
 function lreduce(base, nextbase, row, i, max, baroffset)
 {
    var r = "";
@@ -106,6 +108,8 @@ function wfold(base, foldbase, nextbase, row, i, max, baroffset)
 }
 function generateboard(max)
 {
+   maxplayers = max;
+
    var row;
    if (wfoldin < 0) {
       wfoldin = Math.log2(max)+1+wfoldin;
