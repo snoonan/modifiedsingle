@@ -55,7 +55,8 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
       slot = document.getElementById("s_"+(((matchid-1)*2)+1));
       element = document.createElement("span");
       element.innerText = player_a;
-      if (player_a == "Bye") {
+      if (rank_a == "Bye") {
+         element.innerText = "Bye";
          var late = document.createElement('button');
          late.innerText = 'Add';
          late.onclick = picklate;
@@ -68,7 +69,8 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
       slot = document.getElementById("s_"+(((matchid-1)*2)+2));
       element = document.createElement("span");
       element.innerText = player_b;
-      if (player_b == "Bye") {
+      if (rank_b == "Bye") {
+         element.innerText = "Bye";
          var late = document.createElement('button');
          late.innerText = 'Add';
          late.onclick = picklate;
@@ -84,7 +86,19 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
    if (winneridx > 0) {
       var matchelem = document.getElementById("winner_"+matchid);
       if (matchelem == undefined) {
-         // Match must have already been decided.
+         var m = document.getElementById('m_'+matchid);
+         if (m.childElementCount == 0) {
+            // Out of order match, just put anything in the empty slot(s)
+            var src = document.getElementsByClassName('a_'+matchid)[0];
+            if (src.innerText[0] == '#') {
+               src.innerHTML="<span class='Bye'>";
+            }
+            src = document.getElementsByClassName('b_'+matchid)[0];
+            if (src.innerText[0] == '#') {
+               src.innerHTML="<span class='Bye'>";
+            }
+            match(matchid);
+         }
          return;
       }
 
@@ -106,8 +120,8 @@ function match(matchid)
    var rank_b;
 
    element = document.getElementById("m_"+matchid);
-   if (element == undefined) {
-      return;     // No match, must be the winner
+   if (element == undefined  || element.innerText[0] != '#') {
+      return;
    }
    player_a = document.getElementsByClassName("a_"+matchid)[0].children[0];
    if (player_a == undefined || player_a.localName != "span") {

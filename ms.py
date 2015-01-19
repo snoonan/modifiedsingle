@@ -369,8 +369,10 @@ class PlayerDetailHandler(base_handler.BaseHandler):
 
       if r_op == 'update':
          player.name = r_name
-         player.firstName = r_fname
-         player.lastName = r_lname
+         if r_fname:
+            player.firstName = r_fname
+         if r_lname:
+            player.lastName = r_lname
          player.handicap = r_rank
          player.put()
       elif r_op == 'delete':
