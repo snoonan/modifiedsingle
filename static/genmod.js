@@ -123,7 +123,7 @@ function generateboard(max)
    var table_node = document.getElementById("board");
    for (row = 0; row < max*2; row++) {
       var r = "";
-      var base = (max/2) * 1.5;
+      var base = (max/2);
       var nextbase;
       var foldbase;
       var baroffset = 0;

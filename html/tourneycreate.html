@@ -46,9 +46,10 @@ Rank:<select id="newrank"></select>
 {%- if tourney %}
   var   tourneyname = "{{tourney.slug}}";
    generateboard({{tourney.size}});
+   canupdate = false;
    {% for m in matches %}
      match_results({{m.matchid}},"{{m.playerA.get().name}}", "{{m.handicapA}}", "{{m.playerB.get().name}}", "{{m.handicapB}}", {{m.winner}});
    {% endfor %}
-   send_matches();
+   canupdate = {{create}};
 {%- endif %}
 </script>

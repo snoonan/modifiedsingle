@@ -25,6 +25,11 @@ function  insert_player(name, rank)
    paid.className = "unpaid";
    paid.onclick = playerpaid;
    element.insertBefore(paid, element.firstChild);
+   if (slot.childElementCount%2 == 0) {
+      var pad = document.createElement("span");
+      pad.innerText = "  ";
+      element.insertBefore(pad, element.firstChild);
+   }
    var cancel = document.createElement("span");
    cancel.innerText = "x";
    cancel.className = "cancel";
@@ -41,10 +46,15 @@ function  insert_player(name, rank)
 
 function playerpaid(e)
 {
-   if (e.target.parentElement.children[0].className == 'unpaid') {
-      e.target.parentElement.children[0].className = 'paid';
+   var i=0;
+
+   if (e.target.parentElement.children[0].innerText[0] != '$') {
+      i = 1;
+   }
+   if (e.target.parentElement.children[i].className == 'unpaid') {
+      e.target.parentElement.children[i].className = 'paid';
    } else {
-      e.target.parentElement.children[0].className = 'unpaid';
+      e.target.parentElement.children[i].className = 'unpaid';
    }
    if (document.getElementsByClassName('unpaid').length == 0) {
       document.getElementById('start').disabled = false;

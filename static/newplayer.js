@@ -18,6 +18,10 @@ function update_player()
    }
    prank.selectedIndex = rankidx;
 
+   if (prank.value == "") {
+      // No rank found
+      newplayer(); // Force new player dialog open
+   }
 }
 
 function createplayer()
@@ -71,6 +75,9 @@ function addplayer()
          found = true;
          break;
       }
+   }
+   if (rank == "") {
+      return; // Not a valid player yet.
    }
    if (!found) {
       createplayer();
