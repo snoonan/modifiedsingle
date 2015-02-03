@@ -1,4 +1,7 @@
-#players span{
+#players div{
+   padding:10px;
+}
+#players > span{
    padding:10px;
 }
 .paid{
@@ -9,6 +12,9 @@
 }
 .cancel{
    color:red;
+}
+.swap{
+   color:#0000f0;
 }
 table{
    border-spacing:0;

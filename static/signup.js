@@ -20,17 +20,15 @@ function  insert_player(name, rank)
    element = document.createElement("div");
    element.innerText = name+" ("+rank+")";
    element.className += rank;
-   var paid = document.createElement("span");
+   var paid = document.createElement("button");
    paid.innerText = "$";
    paid.className = "unpaid";
    paid.onclick = playerpaid;
    element.insertBefore(paid, element.firstChild);
-   if (slot.childElementCount%2 == 0) {
-      var pad = document.createElement("span");
-      pad.innerText = "  ";
-      element.insertBefore(pad, element.firstChild);
-   }
-   var cancel = document.createElement("span");
+   var pad = document.createElement("span");
+   pad.className = 'pad';
+   element.insertBefore(pad, element.firstChild);
+   var cancel = document.createElement("button");
    cancel.innerText = "x";
    cancel.className = "cancel";
    cancel.onclick = removeplayer;
@@ -67,8 +65,8 @@ function removeplayer(e) {
    var name = document.getElementById("newplayer");
    var rank = document.getElementById("newrank");
 
-   name.value = e.target.parentElement.childNodes[1].data.split('(')[0].trim();
-   rank.value = e.target.parentElement.childNodes[1].data.split('(')[1].split(')')[0].trim();
+   name.value = e.target.parentElement.childNodes[2].data.split('(')[0].trim();
+   rank.value = e.target.parentElement.childNodes[2].data.split('(')[1].split(')')[0].trim();
    e.target.parentElement.parentElement.removeChild(e.target.parentElement);
 }
 
@@ -151,14 +149,14 @@ function fill_slots(max)
 
    while (slot < max) {
       var p = plist.pop();
-      player_a = p.childNodes[1].data.split('(')[0].trim();
+      player_a = p.childNodes[2].data.split('(')[0].trim();
       rank_a = p.className;
       if (byes.indexOf(slot/2+1) != -1) {
          player_b = "Bye";
          rank_b = "Bye";
       } else {
          p = plist.pop();
-         player_b = p.childNodes[1].data.split('(')[0].trim();
+         player_b = p.childNodes[2].data.split('(')[0].trim();
          rank_b = p.className;
       }
       slot += 2;

@@ -12,6 +12,9 @@
 
    {%- if create %}
      <a href="/Tourney/{{club.key.id()}}/create">New tournement</a><br>
+     <a href="/Player/{{club.key.id()}}">Edit player list</a><br>
+     <a href="/static/invite.html">Edit operators</a><br>
+
    {%- endif %}
    {%- for d in dates %}
        <a href="/Tourney/{{d.club.id()}}/{{ d.slug}}">{{d.name}}</a><br>

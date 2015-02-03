@@ -54,6 +54,7 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
 
       slot = document.getElementById("s_"+(((matchid-1)*2)+1));
       element = document.createElement("span");
+      slot.appendChild(element);
       element.innerText = player_a;
       if (rank_a == "Bye") {
          element.innerText = "Bye";
@@ -63,11 +64,16 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
          element.appendChild(late);
       } else {
          element.innerText += " ("+rank_a+")";
+         var update = document.createElement("select");
+         update.innerHTML = "<option><option>bump skill<option>lower skill<option>swap";
+         update.style.width="20px";
+         update.onchange = function() { editplayer(element); };
+         slot.appendChild(update);
       }
       element.className += rank_a;
-      slot.appendChild(element);
       slot = document.getElementById("s_"+(((matchid-1)*2)+2));
       element = document.createElement("span");
+      slot.appendChild(element);
       element.innerText = player_b;
       if (rank_b == "Bye") {
          element.innerText = "Bye";
@@ -77,9 +83,13 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
          element.appendChild(late);
       } else {
          element.innerText += " ("+rank_b+")";
+         var update = document.createElement("select");
+         update.innerHTML = "<option><option>bump skill<option>lower skill<option>swap";
+         update.style.width="20px";
+         update.onchange = function() { editplayer(element); };
+         slot.appendChild(update);
       }
       element.className += rank_b;
-      slot.appendChild(element);
       match(matchid);
 
    }
@@ -120,7 +130,7 @@ function match(matchid)
    var rank_b;
 
    element = document.getElementById("m_"+matchid);
-   if (element == undefined  || element.innerText[0] != '#') {
+   if (element == undefined  || (element.innerText[0] != '#' && element.childNodes[0].localName != null)) {
       return;
    }
    player_a = document.getElementsByClassName("a_"+matchid)[0].children[0];
@@ -312,9 +322,11 @@ function winner(matchid)
    }
 }
 
+var swap;
 function editplayer(pinfo)
 {
    var sel = pinfo.parentElement.children[1].selectedIndex;
+   pinfo.parentElement.children[1].selectedIndex = 0;
 
    if (sel == 1) {
       var rank = pinfo.className;
@@ -331,8 +343,52 @@ function editplayer(pinfo)
 
       match(pinfo.parentElement.className.slice(2));
    } else if (sel == 3) {
-      var matchid = pinfo.parentElement.id.slice(2);
-      match(matchid);
+      if (pinfo.parentElement.id[0] == 's') {
+         pinfo = pinfo.parentElement;
+         // Swap players
+         if (swap) {
+            if (swap == pinfo) {
+               for(var c = 0; c < pinfo.children.length; c++) {
+                  pinfo.children[c].classList.remove('swap');
+               }
+               swap = undefined;
+               return;
+            }
+
+            var swap_with = [].slice.call(pinfo.children);
+            var swaping = [].slice.call(swap.children);
+            for(var c = 0; c < swaping.length; c++) {
+               swaping[c].classList.remove('swap');
+               pinfo.appendChild(swaping[c])
+            }
+
+            for(var c = 0; c < swap_with.length; c++) {
+               swap.appendChild(swap_with[c]);
+            }
+            match(swap.className.slice(2));
+            match(pinfo.className.slice(2));
+            swap = undefined;
+         } else {
+            swap = pinfo;
+            for(var c = 0; c < pinfo.children.length; c++) {
+               pinfo.children[c].classList.add('swap');
+            }
+         }
+      } else {
+         // Unresolve match
+         var matchid = pinfo.parentElement.id.slice(2);
+         pinfo.parentElement.innerText = "#";
+         match(matchid);
+         var slot;
+         slot = document.getElementById('l_'+matchid)
+         if ( slot ) {
+            slot.innerText = "#l_"+matchid;
+         }
+         slot = document.getElementById('w_'+matchid)
+         if ( slot ) {
+            slot.innerText = "#w_"+matchid;
+         }
+      }
    }
 }
 
