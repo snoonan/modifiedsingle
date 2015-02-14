@@ -1,3 +1,17 @@
+#header {
+  margin-bottom: 2em;
+}
+
+#content {
+  margin: 2em 0 2em 0;
+}
+
+#footer {
+  margin-top: 2em;
+  padding-top: 0.5em;
+  border-top: 1px solid lightgrey;
+}
+
 #players div{
    padding:10px;
 }

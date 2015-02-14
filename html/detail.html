@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title>{{player.name}} at {{club.name}}</title>
-<meta charset="utf-8" />
-<link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
-</head>
+{% extends "/html/base_template.html" %}
+{% block title %}{{player.name}} at {{ club.name }}{% endblock %}
+
+{% block header %}
+  <h1 class="text-center">Player details for {{player.name}} at {{club.name}}</h1>
+{% endblock %}
+{% block content %}
 <div id="player">
 ID:
 {%- if create %}
@@ -94,3 +94,4 @@ function updateplayer(op)
    r.send(f);
 }
 </script>
+{% endblock %}
