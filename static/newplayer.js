@@ -82,7 +82,7 @@ function addplayer()
    if (!found) {
       createplayer();
    }
-   insert_player(name, rank);
+   insert_player(name, rank, false);
 }
 
 function validate()

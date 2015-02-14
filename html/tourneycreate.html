@@ -12,7 +12,7 @@
 <table id="board">
 </table>
 
-{%- if tourney %}
+{%- if matches %}
 <div hidden id="pregame">
 {%- else %}
 <div id="pregame">
@@ -28,7 +28,7 @@ Name:<input id="fname"> <input id="lname"><br>
 Rank:<select id="newrank"></select>
 </div>
 </div>
-<button id="start" disabled onclick="seed_players()">Start Tournement</button><br>
+<button id="start" onclick="seed_players()">Start Tournement</button><br>
 <span id="player_count">no</span> players
 <div id="players">
 </div>
@@ -45,6 +45,23 @@ Rank:<select id="newrank"></select>
 <script type="text/javascript">
 {%- if tourney %}
   var   tourneyname = "{{tourney.slug}}";
+   var tname = document.getElementById("tname");
+   tname.value = "{{tourney.name}}";
+{%- endif %}
+{%- if signups %}
+   canupdate = false;
+   {% for s in signups %}
+      insert_player('{{s.player.get().name}}', '{{s.player.get().handicap}}',
+      {%- if s.paid %}
+         true
+      {%- else %}
+         false
+      {%- endif %}
+      );
+   {% endfor %}
+   canupdate = {{create}};
+{%- endif %}
+{%- if matches %}
    generateboard({{tourney.size}});
    canupdate = false;
    {% for m in matches %}

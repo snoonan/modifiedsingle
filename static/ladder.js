@@ -18,18 +18,24 @@ function late_insert_player(name, rank)
    element.innerText += " ("+rank+")";
    element.className += rank;
    slot.appendChild(element);
+   var update = document.createElement("select");
+   update.innerHTML = "<option><option>bump skill<option>lower skill<option>swap";
+   update.style.width="20px";
+   var update_elem = element;
+   update.onchange = function() { editplayer(update_elem); };
+   slot.appendChild(update);
 
    var matchid = slot.className.slice(2);
 
    element = document.getElementById("m_"+matchid);
-   element.removeChild(element.children[0])
+   element.innerText = '#';
    element = document.getElementById("l_"+matchid);
    if (element) {
-      element.removeChild(element.children[0])
+      element.innerText = '#l_'+matchid;
    }
    element = document.getElementById("w_"+matchid);
    if (element) {
-      element.removeChild(element.children[0])
+      element.innerText = '#w_'+matchid;
    }
 
    match(matchid);
@@ -67,7 +73,8 @@ function match_results(matchid, player_a, rank_a, player_b, rank_b, winneridx)
          var update = document.createElement("select");
          update.innerHTML = "<option><option>bump skill<option>lower skill<option>swap";
          update.style.width="20px";
-         update.onchange = function() { editplayer(element); };
+         var update_elem = element;
+         update.onchange = function() { editplayer(update_elem); };
          slot.appendChild(update);
       }
       element.className += rank_a;

@@ -14,6 +14,7 @@ import clubs
 import tourneys
 import players
 import handicap
+import signup
 
 class DataStore(webapp2.RequestHandler):
    def post(self):
@@ -42,6 +43,8 @@ class DataStore(webapp2.RequestHandler):
 
       tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == r_tourney, tourneys.Tourney.club == club.key)).fetch(1)[0]
 
+      logging.info(r_matchid+" "+r_playerA+" "+r_handicapA)
+      logging.info(r_matchid+" "+r_playerB+" "+r_handicapB)
       player_a = players.Player.query(ndb.AND(players.Player.name == r_playerA, players.Player.club == club.key)).fetch(1)
       if player_a == []:
          logging.info("new player "+r_playerA)
@@ -210,6 +213,7 @@ class CreateTourneyHandler(base_handler.BaseHandler):
       size      = self.request.get('size')
       name      = self.request.get('name')
       date      = self.request.get('date')
+      r_tourney   = self.request.get('tourney')
       slug = re.sub(r"[^A-Za-z0-9]",'-', name)
 
       logging.info(clubid)
@@ -229,12 +233,19 @@ class CreateTourneyHandler(base_handler.BaseHandler):
          club.owners.append(user)
          club = club.put()
 
-      tourney = tourneys.Tourney()
+      logging.info(r_tourney)
+      logging.info(club)
+      tourney = None
+      if size:
+         tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == r_tourney, tourneys.Tourney.club == club.key)).fetch(1)[0]
+      else:
+         tourney = tourneys.Tourney()
       tourney.slug = slug
       tourney.name = name
       tourney.club = club.key
       tourney.date = datetime.fromtimestamp(int(date))
-      tourney.size = int(size)
+      if size:
+         tourney.size = int(size)
       tourney.put()
 
       self.response.set_status(200)
@@ -305,14 +316,81 @@ class TourneyHandler(base_handler.BaseHandler):
       logging.info(tname+" "+clubid)
       tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == tname, tourneys.Tourney.club == club.key)).fetch(1)[0]     # Error handling missing
 
+      signuplist = signup.Signup.query(signup.Signup.tournement == tourney.key).fetch()
       matchlist = matches.Match.query(matches.Match.tourney == tourney.key).order(matches.Match.matchid).fetch()
 
+      logging.info(signuplist)
       context = {'matches': matchlist,
+                 'signups': signuplist,
                  'create': create,
                  'tourney': tourney,
                  'club': club,
                  'login': login}
       self.render_response(TEMPLATE, **context)
+
+
+class SignUpHandler(base_handler.BaseHandler):
+   def get(self, clubid, tname):
+      user = users.get_current_user()
+      login = None
+      create=False
+
+      club = clubs.Club.get_by_id(clubid)
+      if user == None:
+         login = "<a href="+users.create_login_url()+">login</a>"
+      else:
+         login = "Logged in as "+user.nickname()
+         if user in club.owners or user.email() in club.invited:
+            create = True
+
+      tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == tname, tourneys.Tourney.club == club.key)).fetch(1)[0]     # Error handling missing
+
+      matchlist = []
+      plist = signup.Signup.query(signup.Signup.tournement == tourney.key).fetch()
+
+      self.response.set_status(200)
+      self.response.out.write('signedup=[')
+      first = True
+      for p in plist:
+         if not first:
+            self.response.out.write(',')
+         self.response.out.write('{{"name":"{0}","paid":"{1}"}}'.format(p.player.get().name,p.paid))
+         first=False
+
+      self.response.out.write('];')
+
+   def post(self, clubid, tname):
+      r_op   = self.request.get('op')
+      name   = self.request.get('pname')
+
+      user = users.get_current_user()
+      club = clubs.Club.get_by_id(clubid)
+
+      if user not in club.owners:
+         self.response.clear()
+         self.response.set_status(405)
+         self.response.out.write("Not authorized")
+         return
+
+      player = players.Player.query(ndb.AND(players.Player.name == name, players.Player.club == club.key)).fetch(1)[0]
+
+      tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == tname, tourneys.Tourney.club == club.key)).fetch(1)[0]     # Error handling missing
+      if r_op == 'update':
+         adding = signup.Signup()
+         adding.tournement = tourney.key
+         adding.player = player.key
+         adding.put()
+      elif r_op == 'delete':
+         remove = signup.Signup.query(ndb.AND(signup.Signup.tournement == tourney.key, signup.Signup.player == player.key)).fetch(1)[0]     # Error handling missing
+         remove.key.delete()
+      elif r_op == 'paid':
+         paid = signup.Signup.query(ndb.AND(signup.Signup.tournement == tourney.key, signup.Signup.player == player.key)).fetch(1)[0]     # Error handling missing
+         paid.paid = True
+         paid.put()
+      elif r_op == 'unpaid':
+         paid = signup.Signup.query(ndb.AND(signup.Signup.tournement == tourney.key, signup.Signup.player == player.key)).fetch(1)[0]     # Error handling missing
+         paid.paid = False
+         paid.put()
 
 
 class PlayerDetailHandler(base_handler.BaseHandler):
@@ -407,6 +485,7 @@ app = webapp2.WSGIApplication([(r'/Match/', DataStore),
                                (r'/Race/', Race),
                                (r'/', IndexHandler),
                                (r'/Tourney/(.*)/create', CreateTourneyHandler),
+                               (r'/Tourney/(.*)/(.*)/enter', SignUpHandler),
                                (r'/Tourney/(.*)/(.*)', TourneyHandler),
                                (r'/Clubs/(.*)', ClubHandler),
                                (r'/Player/(.*)/(.*)', PlayerDetailHandler),

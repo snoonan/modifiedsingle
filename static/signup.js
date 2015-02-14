@@ -2,7 +2,24 @@
 function tname_set()
 {
    var tname = document.getElementById("tname");
-   document.title=tname
+   document.title=tname.value
+
+   var tname = document.getElementById("tname");
+   tourneyname = tname.value.replace(/[^a-zA-Z0-9]/g, "-")
+   tourneydate = Math.floor(Date.now()/1000);
+
+   var r = new XMLHttpRequest(); 
+   r.open("POST", "/Tourney/"+club+"/create", true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return; 
+      return;
+   };
+   var f = new FormData();
+
+   f.append("club",club);
+   f.append("name",tname.value);
+   f.append("date",tourneydate);
+   r.send(f);
 }
 
 function newplayer()
@@ -11,7 +28,7 @@ function newplayer()
    element.hidden = false;
 }
 
-function  insert_player(name, rank)
+function  insert_player(name, rank, markpaid)
 {
    var slot;
    var element;
@@ -22,7 +39,11 @@ function  insert_player(name, rank)
    element.className += rank;
    var paid = document.createElement("button");
    paid.innerText = "$";
-   paid.className = "unpaid";
+   if (markpaid) {
+      paid.className = "paid";
+   } else {
+      paid.className = "unpaid";
+   }
    paid.onclick = playerpaid;
    element.insertBefore(paid, element.firstChild);
    var pad = document.createElement("span");
@@ -32,7 +53,6 @@ function  insert_player(name, rank)
    cancel.innerText = "x";
    cancel.className = "cancel";
    cancel.onclick = removeplayer;
-   document.getElementById('start').disabled = true;
 
    element.appendChild(cancel);
    slot.appendChild(element);
@@ -40,6 +60,22 @@ function  insert_player(name, rank)
    element = document.getElementById("player_count");
    element.innerText = slot.childElementCount;
 
+   if (!canupdate) {
+      return;
+   }
+
+   var r = new XMLHttpRequest(); 
+   r.open("POST", "/Tourney/"+club+"/"+tourneyname+"/enter", true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return;
+      return;
+   };
+   var f = new FormData();
+
+   f.append("club",club);
+   f.append("pname",name);
+   f.append("op","update");
+   r.send(f);
 }
 
 function playerpaid(e)
@@ -51,14 +87,23 @@ function playerpaid(e)
    }
    if (e.target.parentElement.children[i].className == 'unpaid') {
       e.target.parentElement.children[i].className = 'paid';
+
    } else {
       e.target.parentElement.children[i].className = 'unpaid';
    }
-   if (document.getElementsByClassName('unpaid').length == 0) {
-      document.getElementById('start').disabled = false;
-   } else {
-      document.getElementById('start').disabled = true;
-   }
+
+   var name = e.target.parentElement.childNodes[2].data.split('(')[0].trim();
+   var r = new XMLHttpRequest(); 
+   r.open("POST", "/Tourney/"+club+"/"+tourneyname+"/enter", true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return;
+      return;
+   };
+   var f = new FormData();
+
+   f.append("pname",name);
+   f.append("op",e.target.parentElement.children[i].className);
+   r.send(f);
 }
 
 function removeplayer(e) {
@@ -68,6 +113,18 @@ function removeplayer(e) {
    name.value = e.target.parentElement.childNodes[2].data.split('(')[0].trim();
    rank.value = e.target.parentElement.childNodes[2].data.split('(')[1].split(')')[0].trim();
    e.target.parentElement.parentElement.removeChild(e.target.parentElement);
+
+   var r = new XMLHttpRequest(); 
+   r.open("POST", "/Tourney/"+club+"/"+tourneyname+"/enter", true);
+   r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200) return;
+      return;
+   };
+   var f = new FormData();
+
+   f.append("pname",name.value);
+   f.append("op","delete");
+   r.send(f);
 }
 
 function seed_players()
@@ -108,6 +165,7 @@ function seed_players()
    f.append("club",club);
    f.append("name",tname.value);
    f.append("date",tourneydate);
+   f.append("tourney",tourneyname);
    f.append("size",max);
    r.send(f);
 
@@ -149,15 +207,19 @@ function fill_slots(max)
 
    while (slot < max) {
       var p = plist.pop();
+      var slotelem = document.getElementById('s_'+(slot+1));
       player_a = p.childNodes[2].data.split('(')[0].trim();
       rank_a = p.className;
+      slotelem.classList.add(p.childNodes[1].className);
       if (byes.indexOf(slot/2+1) != -1) {
          player_b = "Bye";
          rank_b = "Bye";
       } else {
          p = plist.pop();
+         slotelem = document.getElementById('s_'+(slot+2));
          player_b = p.childNodes[2].data.split('(')[0].trim();
          rank_b = p.className;
+         slotelem.classList.add(p.childNodes[1].className);
       }
       slot += 2;
       match_results(slot/2, player_a, rank_a, player_b, rank_b, 0 );
@@ -176,4 +238,4 @@ Array.prototype.shuffle = function() {
 var tname = document.getElementById("tname");
 var tnow = new Date();
 tname.value = ""+(tnow.getMonth() + 1) + "-" + tnow.getDate() + "-" + tnow.getFullYear();
-
+tname_set();
