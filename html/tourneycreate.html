@@ -11,11 +11,11 @@
 {%- endif %}
 Tourneyment name<input id="tname" onchange="tname_set()"><br>
 <div id="playerui">
+ID:<input id="newplayer" oninput="validate(); filter_players()"><br>
 <select id="player" onchange="update_player()"><option value>New player</option></select>
 <button id="addplayer" onclick="addplayer()">Enter</button>
 <button onclick="newplayer()">New</button><br>
 <div hidden id="createplayer">
-ID:<input id="newplayer" oninput="validate()"><br>
 Name:<input id="fname"> <input id="lname"><br>
 Rank:<select id="newrank"></select>
 </div>

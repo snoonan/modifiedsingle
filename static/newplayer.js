@@ -65,6 +65,8 @@ function addplayer()
    rank = element.value;
    element = document.getElementById("newplayer");
    name = element.value;
+   element.value = "";
+   filter_players();
 
    var found;
    var i;

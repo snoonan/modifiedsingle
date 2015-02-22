@@ -28,6 +28,26 @@ function newplayer()
    element.hidden = false;
 }
 
+var s = document.createElement("style");
+s.innerHTML="#player option { display: block; }"
+document.body.appendChild(s)
+
+function  filter_players()
+{
+   var filter = document.getElementById('newplayer').value;
+
+   if (filter == "") {
+      s.innerHTML="#player option { display: block; }"
+      return;
+   }
+
+   s.innerHTML="#player option:not([value*='"+filter+"']) { display: none; }"
+   var opts = document.querySelectorAll("#player option[value*='"+filter+"']");
+   if (opts.length) {
+      opts[0].selected = true;
+   }
+}
+
 function  insert_player(name, rank, markpaid)
 {
    var slot;
