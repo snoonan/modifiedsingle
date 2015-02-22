@@ -34,7 +34,10 @@ document.body.appendChild(s)
 
 function  filter_players()
 {
-   var filter = document.getElementById('newplayer').value;
+   var input = document.getElementById('newplayer');
+   var filter = input.value;
+   var cursor = input.selectionStart;
+   filter = filter.slice(0,cursor);
 
    if (filter == "") {
       s.innerHTML="#player option { display: block; }"
@@ -45,6 +48,13 @@ function  filter_players()
    var opts = document.querySelectorAll("#player option[value*='"+filter+"']");
    if (opts.length) {
       opts[0].selected = true;
+      input.value = opts[0].value;
+      update_player();
+      input.selectionStart = cursor;
+      input.selectionEnd = cursor;
+   }
+   if (opts.length == 1) {
+      document.getElementById('newplayer').value = opts[0].value;
    }
 }
 
