@@ -11,6 +11,9 @@ function tname_set()
    var r = new XMLHttpRequest(); 
    r.open("POST", "/Tourney/"+club+"/create", true);
    r.onreadystatechange = function () {
+      if (r.status == 301 && r.responseText != "" && document.location.pathname != r.responseText) {
+         document.location = r.responseText;
+      }
       if (r.readyState != 4 || r.status != 200) return; 
       return;
    };
@@ -40,22 +43,24 @@ function  filter_players()
    filter = filter.slice(0,cursor);
 
    if (filter == "") {
-      s.innerHTML="#player option { display: block; }"
+      s.innerHTML="#player option { display: block; }";
       return;
    }
 
-   s.innerHTML="#player option:not([value*='"+filter+"']) { display: none; }"
-   var opts = document.querySelectorAll("#player option[value*='"+filter+"']");
+   s.innerHTML="#player option:not([value*='"+filter+"']) { display: none; }";
+   var opts = document.querySelectorAll("#player option[value^='"+filter+"']");
    if (opts.length) {
       opts[0].selected = true;
       input.value = opts[0].value;
       update_player();
       input.selectionStart = cursor;
       input.selectionEnd = cursor;
+   } else {
+      input.value = filter;
+      input.selectionStart = cursor;
+      input.selectionEnd = cursor;
    }
-   if (opts.length == 1) {
-      document.getElementById('newplayer').value = opts[0].value;
-   }
+
 }
 
 function  insert_player(name, rank, markpaid)
@@ -63,6 +68,7 @@ function  insert_player(name, rank, markpaid)
    var slot;
    var element;
 
+   s.innerHTML="#player { display: default }";
    slot = document.getElementById("players");
    element = document.createElement("div");
    element.innerText = name+" ("+rank+")";
@@ -104,6 +110,7 @@ function  insert_player(name, rank, markpaid)
 
    f.append("club",club);
    f.append("pname",name);
+   f.append("rank",name);
    f.append("op","update");
    r.send(f);
 }
@@ -266,6 +273,8 @@ Array.prototype.shuffle = function() {
 }
 
 var tname = document.getElementById("tname");
-var tnow = new Date();
-tname.value = ""+(tnow.getMonth() + 1) + "-" + tnow.getDate() + "-" + tnow.getFullYear();
-tname_set();
+if (tourneyname == undefined) {
+   var tnow = new Date();
+   tname.value = ""+(tnow.getMonth() + 1) + "-" + tnow.getDate() + "-" + tnow.getFullYear();
+   tname_set();
+}

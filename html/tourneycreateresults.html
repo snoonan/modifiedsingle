@@ -20,47 +20,21 @@ Name:<input id="fname"> <input id="lname"><br>
 Rank:<select id="newrank"></select>
 </div>
 </div>
-<button id="start" onclick="seed_players()">Start Tournement</button><br>
-<span id="player_count">no</span> players
+<button id="start" onclick="place_players()">Finish Tournement</button><br>
 <div id="players">
 </div>
 <script type="text/javascript">
   var   club = "{{club.key.id()}}";
   var   clubname = "{{club.name}}";
   var   canupdate = {{create}};
-  var   tourneyname = "{{tourney.slug}}";
-</script>
-<script type="text/javascript" src="/static/config.js"></script>
-<script type="text/javascript" src="/static/signup.js"></script>
-<script type="text/javascript" src="/static/newplayer.js"></script>
-<script type="text/javascript" src="/static/genmod.js"></script>
-<script type="text/javascript" src="/static/ladder.js"></script>
-<script type="text/javascript">
+  var   tourneyname = undefined;
 {%- if tourney %}
   var   tourneyname = "{{tourney.slug}}";
-   var tname = document.getElementById("tname");
-   tname.value = "{{tourney.name}}";
 {%- endif %}
-{%- if signups %}
-   canupdate = false;
-   {% for s in signups %}
-      insert_player('{{s.player.get().name}}', '{{s.player.get().handicap}}',
-      {%- if s.paid %}
-         true
-      {%- else %}
-         false
-      {%- endif %}
-      );
-   {% endfor %}
-   canupdate = {{create}};
-{%- endif %}
-{%- if matches %}
-   generateboard({{tourney.size}});
-   canupdate = false;
-   {% for m in matches %}
-     match_results({{m.matchid}},"{{m.playerA.get().name}}", "{{m.handicapA}}", "{{m.playerB.get().name}}", "{{m.handicapB}}", {{m.winner}});
-   {% endfor %}
-   canupdate = {{create}};
-{%- endif %}
+</script>
+<script type="text/javascript" src="/static/config.js"></script>
+<script type="text/javascript" src="/static/finish.js"></script>
+<script type="text/javascript" src="/static/newplayer.js"></script>
+<script type="text/javascript">
 </script>
 {% endblock %}

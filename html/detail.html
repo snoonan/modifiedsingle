@@ -33,7 +33,26 @@ Handicap:
 <button onclick='updateplayer("delete")'>Delete</button>
 {%- endif %}
 </div>
-  <table id="players-matches">
+  <table id="players-wins" class="table table-hover table-condensed sortable-table">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Handicap</th>
+        <th>Place</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in wins|sort(attribute="tourney") %}
+      <tr>
+        <td><a href="/Tourney/{{club.key.id()}}/{{ entry.tourney.get().slug }}">
+            {{ entry.tourney.get().name }}</a></td>
+        <td>{{ entry.handicap }}</td>
+        <td>{{entry.place}}</td>
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+  <table id="players-matches" class="table table-hover table-condensed sortable-table">
     <thead>
       <tr>
         <th>Event</th>
@@ -49,7 +68,7 @@ Handicap:
     <tbody>
     {% for entry in matches |sort(attribute="matchid")|sort(attribute="tourney") %}
       <tr>
-        <td><a href="/Tourneys/{{club.key.id()}}/{{ entry.tourney.get().slug }}">
+        <td><a href="/Tourney/{{club.key.id()}}/{{ entry.tourney.get().slug }}">
             {{ entry.tourney.get().name }}</a></td>
         <td>{{ entry.matchid }}</td>
         <td><a href="/Player/{{club.key.id()}}/{{ entry.playerA.get().name }}">

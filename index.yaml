@@ -24,3 +24,9 @@ indexes:
   properties:
   - name: club
   - name: name
+
+- kind: Tourney
+  properties:
+  - name: club
+  - name: date
+    direction: desc

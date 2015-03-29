@@ -65,7 +65,6 @@ function addplayer()
    rank = element.value;
    element = document.getElementById("newplayer");
    name = element.value;
-   element.value = "";
    filter_players();
 
    var found;
@@ -85,6 +84,9 @@ function addplayer()
       createplayer();
    }
    insert_player(name, rank, false);
+
+   // Clean up for next entry
+   element.value = "";
 }
 
 function validate()

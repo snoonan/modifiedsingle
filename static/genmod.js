@@ -40,7 +40,7 @@ function lfold(base, foldbase, nextbase, row, i, max, baroffset)
 //         loserof ^= 1;
       }
       loserof += 1;
-      r = "<td class=\"loseredge\"><td class=\"matchedge\"><span id=\"l_{slot}\" class=\"b_{next}\">#l_{slot}</span><td class=\"loseredge\">&nbsp;&nbsp;".format({
+      r = "<td class=\"loseredge\"><td class=\"matchedge\"><span id=\"l_{slot}\" class=\"b_{next}\">#l_{slot}</span><td style=\"width:20px\" class=\"loseredge\">".format({
         "slot":loserof,
         "next":Math.floor(row/(i*2))+foldbase+1,
         "half":"ab".charAt(Math.floor((row%(i*4))/(i*2)))
@@ -93,7 +93,7 @@ function wfold(base, foldbase, nextbase, row, i, max, baroffset)
          winnerof ^= 1;
       }
       winnerof += 1;
-      r += "<td class=\"winedge\">&nbsp;&nbsp;<td class=\"matchedge\"><span id=\"w_{slot}\" class=\"b_{next}\">#w_{slot}</span><td class=\"winedge\">".format({
+      r += "<td style=\"width=20px\" class=\"winedge\"><td class=\"matchedge\"><span id=\"w_{slot}\" class=\"b_{next}\">#w_{slot}</span><td class=\"winedge\">".format({
         "slot":winnerof,
         "next":Math.floor(row/(i*2))+foldbase+1,
         "half":"ab".charAt(Math.floor((row%(i*4))/(i*2)))
@@ -149,7 +149,7 @@ function generateboard(max)
 
       if (wfoldat != 1) {
          if (row%4 == 2) {
-                  r += "<td class=\"loseredge matchedge\"><span id=\"l_{slot}\" class=\"{half}_{next}\"></span>".format({
+                  r += "<td class=\"loseredge matchedge\"><span id=\"l_{slot}\" class=\"{half}_{next}\">#l_{slot}</span>".format({
                     "slot":Math.floor(row/4)+1,
                     "next":Math.floor(row/8)+(max/2)+1,
                     "half":"ab".charAt(Math.floor((row%8)/4))

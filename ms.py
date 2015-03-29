@@ -10,6 +10,7 @@ import re
 import base_handler
 import logging
 import matches
+import winners
 import clubs
 import tourneys
 import players
@@ -94,6 +95,57 @@ class DataStore(webapp2.RequestHandler):
       self.response.clear()
       self.response.set_status(200)
       self.response.out.write("match recorded")
+
+
+class WinnerStore(webapp2.RequestHandler):
+   def post(self):
+      user = users.get_current_user()
+
+      r_club      = self.request.get('club')
+      r_tourney   = self.request.get('tourney')
+      r_place     = self.request.get('place')
+      r_playerA   = self.request.get('pname')
+      r_handicapA = self.request.get('rank')
+
+      club = clubs.Club.get_by_id(r_club)
+
+      if user not in club.owners:
+         self.response.clear()
+         self.response.set_status(405)
+         self.response.out.write("Not authorized")
+         return
+
+      tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == r_tourney, tourneys.Tourney.club == club.key)).fetch(1)[0]
+
+      player_a = players.Player.query(ndb.AND(players.Player.name == r_playerA, players.Player.club == club.key)).fetch(1)
+      if player_a == []:
+         logging.info("new player "+r_playerA)
+         player_a = players.Player()
+         player_a.name = r_playerA
+         player_a.club = club.key
+         player_a.handicap = r_handicapA
+         player_a = player_a.put()
+      else:
+         player_a[0].handicap = r_handicapA
+         player_a = player_a[0].put()
+
+      winner = winners.Winner.query(ndb.AND(winners.Winner.tourney == tourney.key, winners.Winner.player == player_a)).fetch(1)
+      if winner == []:
+         winner = winners.Winner()
+      else:
+         winner = winner[0]
+
+      winner.club = club.key
+      winner.tourney = tourney.key
+      #winner.matchid = int(r_matchid)
+      winner.player = player_a
+      winner.handicap = r_handicapA
+      winner.place = r_place
+
+      winner.put()
+      self.response.clear()
+      self.response.set_status(200)
+      self.response.out.write("winner recorded")
 
 class Create(webapp2.RequestHandler):
    def post(self):
@@ -189,7 +241,7 @@ class Config(webapp2.RequestHandler):
 
 class CreateTourneyHandler(base_handler.BaseHandler):
    def get(self, clubid):
-      TEMPLATE = 'html/tourneycreate.html'
+      TEMPLATE = 'html/tourneycreateresults.html'
 
       create = 0
       user = users.get_current_user()
@@ -213,7 +265,6 @@ class CreateTourneyHandler(base_handler.BaseHandler):
       size      = self.request.get('size')
       name      = self.request.get('name')
       date      = self.request.get('date')
-      r_tourney   = self.request.get('tourney')
       slug = re.sub(r"[^A-Za-z0-9]",'-', name)
 
       logging.info(clubid)
@@ -233,13 +284,16 @@ class CreateTourneyHandler(base_handler.BaseHandler):
          club.owners.append(user)
          club = club.put()
 
-      logging.info(r_tourney)
-      logging.info(club)
       tourney = None
-      if size:
-         tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == r_tourney, tourneys.Tourney.club == club.key)).fetch(1)[0]
+      tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == slug, tourneys.Tourney.club == club.key)).fetch(1)
+      if len(tourney) != 0:
+         tourney = tourney[0]
+         self.response.set_status(200)
+         self.response.out.write("/Tourney/"+club.name+"/"+slug)
       else:
          tourney = tourneys.Tourney()
+         self.response.set_status(200)
+         self.response.out.write("tourney recorded")
       tourney.slug = slug
       tourney.name = name
       tourney.club = club.key
@@ -248,8 +302,6 @@ class CreateTourneyHandler(base_handler.BaseHandler):
          tourney.size = int(size)
       tourney.put()
 
-      self.response.set_status(200)
-      self.response.out.write("match recorded")
 
 
 class IndexHandler(base_handler.BaseHandler):
@@ -288,7 +340,7 @@ class ClubHandler(base_handler.BaseHandler):
                club = club.put()
             create = True
 
-      dates = tourneys.Tourney.query(tourneys.Tourney.club == ndb.Key(clubs.Club, clubid)).fetch()
+      dates = tourneys.Tourney.query(tourneys.Tourney.club == ndb.Key(clubs.Club, clubid)).order(-tourneys.Tourney.date).fetch()
 
       for d in dates:
          d.udate = int(time.mktime(d.date.timetuple()))
@@ -301,7 +353,7 @@ class ClubHandler(base_handler.BaseHandler):
 
 class TourneyHandler(base_handler.BaseHandler):
    def get(self, clubid, tname):
-      TEMPLATE = 'html/tourneycreate.html'
+      TEMPLATE = 'html/tourneycreateresults.html'
 
       create = 0
       user = users.get_current_user()
@@ -362,6 +414,7 @@ class SignUpHandler(base_handler.BaseHandler):
    def post(self, clubid, tname):
       r_op   = self.request.get('op')
       name   = self.request.get('pname')
+      rank   = self.request.get('rank')
 
       user = users.get_current_user()
       club = clubs.Club.get_by_id(clubid)
@@ -372,7 +425,15 @@ class SignUpHandler(base_handler.BaseHandler):
          self.response.out.write("Not authorized")
          return
 
-      player = players.Player.query(ndb.AND(players.Player.name == name, players.Player.club == club.key)).fetch(1)[0]
+      player = players.Player.query(ndb.AND(players.Player.name == name, players.Player.club == club.key)).fetch(1)
+      if len(player) != 0:
+         player = player[0]
+      else:
+         player = players.Player()
+         player.club = club.key
+         player.name = name
+         player.handicap = rank
+         player = player.put()
 
       tourney = tourneys.Tourney.query(ndb.AND(tourneys.Tourney.slug == tname, tourneys.Tourney.club == club.key)).fetch(1)[0]     # Error handling missing
       if r_op == 'update':
@@ -409,17 +470,20 @@ class PlayerDetailHandler(base_handler.BaseHandler):
             create = True
 
       matchlist = []
+      winlist = []
       player = players.Player.query(ndb.AND(players.Player.name == name, players.Player.club == club.key)).fetch(1)
       if (player == []):
          player = {'name': name}
       else:
          player = player[0]
          matchlist = matches.Match.query(ndb.OR(matches.Match.playerA == player.key, matches.Match.playerB == player.key)).fetch()
+         winlist = winners.Winner.query(winners.Winner.player == player.key).fetch()
 
       context = {'club': club,
                  'player': player,
                  'create': create,
                  'matches': matchlist,
+                 'wins': winlist,
                  'login': login}
       self.render_response(TEMPLATE, **context)
 
@@ -479,6 +543,7 @@ class PlayerListHandler(base_handler.BaseHandler):
 
 
 app = webapp2.WSGIApplication([(r'/Match/', DataStore),
+                               (r'/Winner/', WinnerStore),
                                (r'/Config/(.*)', Config),
                                (r'/Create/', Create),
                                (r'/Invite/', Invite),

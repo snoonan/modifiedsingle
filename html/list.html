@@ -1,12 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title>Players at {{club.name}}</title>
-<meta charset="utf-8" />
-<link rel="stylesheet" type="text/css" href="/static/modifiedsingle.css">
-</head>
-<div id="players">
-  <table id="players-summary">
+{% extends "/html/base_template.html" %}
+{% block title %}Players at {{ club.name }}{% endblock %}
+
+{% block header %}
+  <h1 class="text-center">Player list at {{club.name}}</h1>
+{% endblock %}
+{% block content %}
+  <table id="players-summary" class="table table-hover table-condensed sortable-table">
     <thead>
       <tr>
         <th>ID</th>
@@ -16,14 +15,16 @@
     </thead>
     <tbody>
     {% for entry in players %}
+{%- if entry.firstName != None %}
       <tr>
         <td>{{ entry.name }}</td>
         <td><a href="/Player/{{club.key.id()}}/{{ entry.name }}">
             {{ entry.firstName }} {{ entry.lastName }}</a></td>
         <td>{{ entry.handicap }}</td>
       </tr>
+{%- endif %}
     {%- endfor %}
     </tbody>
   </table>
 
-</div>
+{% endblock %}
