@@ -69,7 +69,7 @@ function  insert_player(name, rank, markpaid)
    var element;
 
    s.innerHTML="#player { display: default }";
-   slot = document.getElementById("players");
+   slot = document.getElementById("winners");
    element = document.createElement("div");
    element.innerText = name+" ("+rank+")";
    element.className += rank;
